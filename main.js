@@ -154,26 +154,30 @@ ipcMain.handle('copyFavs', async (e, root, title) => {
 });
 
 // Background analysis of all folders. Progress persists in state.done (dir -> computed feature keys) and resumes on restart.
+// state.doneN keeps the photo count at that time: a folder with a different count is analyzed again.
 state.done ||= {};
+state.doneN ||= {};
 let loop = null;
-const isDone = (dir, keys) => keys.every(k => state.done[dir]?.includes(k));
+const isDone = (d, keys) => state.doneN[d.dir] === d.n && keys.every(k => state.done[d.dir]?.includes(k));
 const complete = (items, keys) => items.every(it => keys.every(k => it[k] !== undefined));
 function markDone(dir, keys, items) {
   if (items.cancelled || !complete(items, keys)) return false;
   state.done[dir] = [...new Set([...(state.done[dir] || []), ...keys])];
+  state.doneN[dir] = items.length;
+  const d = state.dirs.find(x => x.dir === dir); if (d) d.n = items.length; // keep the tree count current
   saveState(); win?.webContents.send('dirDone', dir);
   return true;
 }
 function progress(extra) {
   const keys = needed(state.settings);
-  win?.webContents.send('progress', { running: state.running, done: state.dirs.filter(d => isDone(d.dir, keys)).length, total: state.dirs.length, ...extra });
+  win?.webContents.send('progress', { running: state.running, done: state.dirs.filter(d => isDone(d, keys)).length, total: state.dirs.length, ...extra });
 }
 function analyzeLoop() {
   loop ||= (async () => {
     let error;
     const gen = rootGen;
     while (state.running && gen === rootGen) {
-      const keys = needed(state.settings), d = state.dirs.find(d => !isDone(d.dir, keys));
+      const keys = needed(state.settings), d = state.dirs.find(d => !isDone(d, keys));
       if (!d) break;
       const items = await analyzeDir(d.dir, keys, (i, n, eta) => { progress({ dir: d.dir, i, n }); win?.webContents.send('dirProgress', { dir: d.dir, i, n, eta }); }, () => !state.running || gen !== rootGen).catch(() => []);
       if (items.cancelled) break;
@@ -215,4 +219,4 @@ ipcMain.handle('magic', async e => {
   return { added, dirs, favs };
 });
 ipcMain.handle('setRunning', (e, on) => { state.running = on; saveState(); on ? analyzeLoop() : progress(); });
-ipcMain.handle('doneDirs', () => state.dirs.map(d => d.dir).filter(d => isDone(d, needed(state.settings))));
+ipcMain.handle('doneDirs', () => state.dirs.filter(d => isDone(d, needed(state.settings))).map(d => d.dir));
