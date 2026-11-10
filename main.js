@@ -72,7 +72,8 @@ state.settings = { ...DEFAULTS, ...state.settings, m: { ...DEFAULTS.m, ...state.
 // Group similar photos in folder
 ipcMain.handle('groups', async (e, dir) => {
   const my = ++viewGen, keys = needed(state.settings);
-  const items = await analyzeDir(dir, keys, (i, n, eta) => e.sender.send('dirProgress', { dir, i, n, eta }), () => my !== viewGen);
+  const items = await analyzeDir(dir, keys, (i, n, eta) => e.sender.send('dirProgress', { dir, i, n, eta }), () => my !== viewGen).catch(() => null);
+  if (!items) return { groups: [], scores: {} }; // folder is gone (moved, deleted, drive unplugged)
   if (items.cancelled) { e.sender.send('dirProgress', { dir, i: 0, n: 0 }); return null; }
   markDone(dir, keys, items);
   const r = group(items, state.settings);
@@ -81,7 +82,7 @@ ipcMain.handle('groups', async (e, dir) => {
 });
 // instant result: last saved grouping, or all photos as one provisional group
 ipcMain.handle('groupsQuick', async (e, dir) => getLast(dir) ||
-  { groups: [(await fsp.readdir(dir)).filter(isImg).sort((a, b) => a.localeCompare(b, undefined, { numeric: true })).map(f => path.join(dir, f))], scores: {} });
+  { groups: [(await fsp.readdir(dir).catch(() => [])).filter(isImg).sort((a, b) => a.localeCompare(b, undefined, { numeric: true })).map(f => path.join(dir, f))].filter(g => g.length), scores: {} });
 // neural model: availability check and download with progress; enables the method when done
 ipcMain.handle('modelReady', () => embed.isReady());
 ipcMain.handle('downloadModel', async e => {
