@@ -166,7 +166,7 @@ export default function App() {
       <div id="bar">
         <button onClick={pick}>{t('pick')}</button>
         <button onClick={copy}>{t('copy')}</button>
-        <button onClick={clearFavs} disabled={!favCount}>{t('clear')}</button>
+        <button onClick={clearFavs} disabled={!favCount || !!magic}>{t('clear')}</button>
         <button onClick={() => setShowSet(!showSet)}>{t('algo')}</button>
         <button onClick={() => api.setRunning(!prog?.running)}>{prog?.running ? t('pause') : t('run')}</button>
         <span>{prog && t('analyzed', prog.done, prog.total) + (prog.running && prog.dir ? ` · ${base(prog.dir)} ${prog.i}/${prog.n}` : '') + (prog.error ? ' · ' + t(prog.error) : '')}</span>
