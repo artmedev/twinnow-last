@@ -91,6 +91,14 @@ ipcMain.handle('thumb', async (e, file) => {
   }
 });
 
+// photo details for the info panel
+ipcMain.handle('info', async (e, f) => {
+  const st = await fsp.stat(f).catch(() => null);
+  const x = (await require('exifr').parse(f, { tiff: true, exif: true, gps: true }).catch(() => null)) || {};
+  return { size: st?.size, mtime: st?.mtimeMs, make: x.Make, model: x.Model, lens: x.LensModel, taken: (x.DateTimeOriginal || x.CreateDate)?.getTime?.(),
+    exp: x.ExposureTime, f: x.FNumber, iso: x.ISO, focal: x.FocalLength, lat: x.latitude, lon: x.longitude };
+});
+
 ipcMain.handle('setFav', (e, dir, file, on) => {
   const s = new Set(favs[dir] || []);
   on ? s.add(file) : s.delete(file);

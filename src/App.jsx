@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import Settings from './Settings.jsx';
 import { t, LangSwitch } from './i18n.jsx';
 import ModelToast from './ModelToast.jsx';
+import Info from './Info.jsx';
 
 const api = window.api;
 const cache = new Map();
@@ -63,6 +64,7 @@ export default function App() {
   const [scores, setScores] = useState({});
   const [gi, setGi] = useState(0);
   const [cur, setCur] = useState(null);
+  const [dims, setDims] = useState(null);
   const now = useRef({});
   now.current = { curDir, cur };
   const [settings, setSettings] = useState(null);
@@ -180,7 +182,7 @@ export default function App() {
                 </div>
               ))}
             </div>
-            <div id="view">{cur && <><img src={url(cur)} /><div>{base(cur)}</div></>}</div>
+            <div id="view">{cur && <><div className="pic"><img src={url(cur)} onLoad={e => setDims([e.target.naturalWidth, e.target.naturalHeight])} /></div><Info f={cur} dims={dims} score={scores[cur]} /></>}</div>
           </div>
         </div>
       </div>

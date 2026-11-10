@@ -15,8 +15,11 @@ button{background:#3a3a3a;color:#ddd;border:1px solid #555;padding:4px 10px;curs
 #grid{width:45%;overflow:auto;display:flex;flex-wrap:wrap;align-content:flex-start;gap:6px;padding:6px;border-right:1px solid #444}
 .ph{position:relative;cursor:pointer;border:2px solid transparent}.ph.cur{border-color:#4af}
 .ph img{height:130px;display:block}.ph b{position:absolute;left:2px;top:0;font-size:20px;color:#888;text-shadow:0 0 3px #000}.ph.fav b{color:#fc3}
-#view{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;padding:6px}
-#view img{max-width:100%;max-height:calc(100% - 30px);object-fit:contain}
+#view{flex:1;display:flex;min-width:0}
+#view .pic{flex:1;display:flex;align-items:center;justify-content:center;min-width:0;padding:6px}#view img{max-width:100%;max-height:100%;object-fit:contain}
+#info{width:220px;flex:none;overflow:auto;padding:8px;border-inline-start:1px solid #444;font-size:12px;line-height:1.5}
+#info .name{font-weight:600;word-break:break-all;margin-bottom:6px}#info b{display:block;color:#888;font-weight:400;font-size:11px;margin-top:4px}
+#info .path{color:#777;word-break:break-all;margin-top:8px;font-size:11px}
 #settings{padding:6px 10px;background:#252525;border-bottom:1px solid #444;display:flex;flex-wrap:wrap;gap:6px 24px}
 #settings .meth{display:flex;gap:8px;align-items:center}#settings .meth label{min-width:200px}
 select{background:#3a3a3a;color:#ddd;border:1px solid #555}
