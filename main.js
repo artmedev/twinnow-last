@@ -4,10 +4,16 @@ const fs = require('fs'), fsp = fs.promises, path = require('path');
 const EXT = new Set(['.jpg', '.jpeg', '.png', '.bmp', '.gif', '.webp', '.tif', '.tiff']);
 const SKIP = new Set(['windows', 'program files', 'program files (x86)', 'programdata', 'appdata', 'node_modules', '$recycle.bin', 'system volume information']);
 const isImg = f => EXT.has(path.extname(f).toLowerCase());
-const favFile = () => path.join(app.getPath('userData'), 'favorites.json');
-let favs = {};
-try { favs = JSON.parse(fs.readFileSync(favFile(), 'utf8')); } catch {}
-const saveFavs = () => fs.writeFileSync(favFile(), JSON.stringify(favs, null, 1));
+const store = require('./lib/store');
+store.init(app.getPath('userData'));
+const state = store.load('state.json', { root: null, dirs: [], ui: {}, scanning: false });
+const favs = store.load('favorites.json', {});
+const saveState = () => store.save('state.json', state);
+const saveFavs = () => store.save('favorites.json', favs, 0);
+app.on('before-quit', store.flush);
+
+ipcMain.handle('getState', () => ({ ...state, favs }));
+ipcMain.handle('setUi', (e, ui) => { state.ui = ui; saveState(); });
 
 app.whenReady().then(() => {
   const w = new BrowserWindow({ width: 1400, height: 900, webPreferences: { preload: path.join(__dirname, 'preload.js') } });
@@ -24,6 +30,7 @@ ipcMain.handle('pickDir', async () => {
 // Recursively find folders containing images
 ipcMain.handle('scan', async (e, root) => {
   const out = [];
+  Object.assign(state, { root, dirs: out, scanning: true });
   async function walk(dir) {
     let ents;
     try { ents = await fsp.readdir(dir, { withFileTypes: true }); } catch { return; }
@@ -33,9 +40,10 @@ ipcMain.handle('scan', async (e, root) => {
         if (!SKIP.has(d.name.toLowerCase()) && !d.name.startsWith('.')) await walk(path.join(dir, d.name));
       } else if (isImg(d.name)) n++;
     }
-    if (n) { out.push({ dir, n }); e.sender.send('scanProgress', out.length); }
+    if (n) { out.push({ dir, n }); e.sender.send('scanProgress', out.length); saveState(); }
   }
   await walk(root);
+  state.scanning = false; saveState();
   return out;
 });
 
@@ -80,7 +88,6 @@ ipcMain.handle('thumb', async (e, file) => {
   }
 });
 
-ipcMain.handle('getFavs', () => favs);
 ipcMain.handle('setFav', (e, dir, file, on) => {
   const s = new Set(favs[dir] || []);
   on ? s.add(file) : s.delete(file);

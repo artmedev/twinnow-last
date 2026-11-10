@@ -60,18 +60,33 @@ export default function App() {
   const [cur, setCur] = useState(null);
   const [thr, setThr] = useState(12);
 
-  useEffect(() => {
-    api.getFavs().then(setFavs);
-    api.onScan(n => setStatus(`Сканирование… папок с фото: ${n}`));
-  }, []);
-
-  const pick = async () => {
-    const d = await api.pickDir(); if (!d) return;
-    setRoot(d); setTree(null); setCurDir(null); setGroups(null);
+  const scan = async d => {
+    setRoot(d);
     const dirs = await api.scan(d);
     setStatus(`Папок с фото: ${dirs.length}`);
     setTree(buildTree(d, dirs));
   };
+
+  // restore previous session
+  useEffect(() => {
+    api.onScan(n => setStatus(`Сканирование… папок с фото: ${n}`));
+    api.getState().then(s => {
+      setFavs(s.favs);
+      if (!s.root) return;
+      setRoot(s.root); setTree(buildTree(s.root, s.dirs));
+      if (s.ui.thr) setThr(s.ui.thr);
+      if (s.ui.curDir) open(s.ui.curDir, s.ui.thr || thr, s.ui);
+      if (s.scanning) scan(s.root);
+    });
+  }, []);
+
+  const pick = async () => {
+    const d = await api.pickDir(); if (!d) return;
+    setTree(null); setCurDir(null); setGroups(null);
+    scan(d);
+  };
+
+  useEffect(() => { if (curDir) api.setUi({ curDir, gi, cur, thr }); }, [curDir, gi, cur, thr]);
 
   const copy = async () => {
     if (!Object.keys(favs).length) return alert('Нет избранных фото');
@@ -80,10 +95,13 @@ export default function App() {
   };
 
   const openGroup = (gs, i) => { setGi(i); setCur(gs[i]?.[0] || null); };
-  const open = async (dir, t = thr) => {
+  const open = async (dir, t = thr, keep) => {
     setCurDir(dir); setGroups(null);
     const gs = await api.groups(dir, t);
-    setGroups(gs); openGroup(gs, 0);
+    setGroups(gs);
+    const i = keep && gs[keep.gi] ? keep.gi : 0;
+    openGroup(gs, i);
+    if (keep && gs[i].includes(keep.cur)) setCur(keep.cur);
   };
 
   const favSet = useMemo(() => new Set(favs[curDir] || []), [favs, curDir]);
