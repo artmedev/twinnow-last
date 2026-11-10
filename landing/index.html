@@ -3,49 +3,55 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Twinnow: free app to find similar photos and keep the best</title>
-<meta name="description" content="Twinnow is a free, open-source desktop app that finds series of similar photos, lets you keep the best shots and copies them out with the folder structure. Runs locally on Windows, macOS and Linux.">
+<title>Twinnow: free private app to find similar photos and keep the best</title>
+<meta name="description" content="Twinnow is a free, open-source desktop app that finds similar photos and lets you keep the best shots. Everything runs on your computer, nothing is uploaded, and it never deletes anything: it only copies your picks. Windows, macOS, Linux.">
 <meta property="og:title" content="Twinnow: keep the best shot, skip the twins">
-<meta property="og:description" content="Free and open source. Finds similar photos, you star the best, it copies them out. 100% local.">
+<meta property="og:description" content="Free and open source. 100% on your computer. Never deletes, only copies.">
 <meta property="og:image" content="https://twinnow.artme.dev/screenshot.jpg">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><text y='20' font-size='20'>★</text></svg>">
 <style>
 :root{--bg:#141414;--card:#1e1e1e;--line:#2e2e2e;--fg:#e8e8e8;--muted:#9a9a9a;--accent:#4a90d9;--star:#fc3;--free:#3ecf8e}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
 a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
-.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
-nav{display:flex;justify-content:space-between;align-items:center;padding:18px 0}nav b{font-size:20px}nav b span{color:var(--star)}nav a{color:var(--muted);margin-inline-start:18px;font-size:15px}
-header{padding:40px 0 36px;text-align:center}
-.badges{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:20px}
-.badge{border:1px solid var(--free);color:var(--free);border-radius:999px;padding:4px 14px;font-size:14px;font-weight:600}
-h1{font-size:clamp(34px,6vw,56px);line-height:1.1;margin:0 0 16px}h1 span{color:var(--star)}
-.lead{font-size:clamp(17px,2.4vw,21px);color:var(--muted);max-width:700px;margin:0 auto 32px}
-.dl{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;max-width:760px;margin:0 auto}
-.os{display:flex;flex-direction:column;align-items:center;gap:4px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 16px;color:var(--fg)}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+.logo{font-size:22px;font-weight:800;letter-spacing:-.5px;background:linear-gradient(90deg,var(--star),#ff8a3d 45%,var(--accent));-webkit-background-clip:text;background-clip:text;color:transparent}
+nav{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:20px 0;flex-wrap:wrap}
+nav div{display:flex;gap:24px;flex-wrap:wrap}nav div a{color:var(--muted);font-size:15px}
+header{padding:48px 0 40px;text-align:center}
+.badges{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:28px}
+.badge{border:1px solid var(--free);color:var(--free);border-radius:999px;padding:5px 16px;font-size:14px;font-weight:600}
+h1{font-size:clamp(34px,6vw,56px);line-height:1.1;margin:0 0 20px}h1 span{color:var(--star)}
+.lead{font-size:clamp(17px,2.4vw,21px);color:var(--muted);max-width:720px;margin:0 auto 36px}.lead b{color:var(--fg);font-weight:600}
+.dl{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px;max-width:760px;margin:0 auto}
+.os{display:flex;flex-direction:column;align-items:center;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:24px 18px;color:var(--fg)}
 .os:hover{text-decoration:none;border-color:var(--accent)}.os.me{background:var(--accent);border-color:var(--accent);color:#fff}
-.os svg{width:34px;height:34px;fill:currentColor}.os b{font-size:19px}.os small{color:inherit;opacity:.75;font-size:13px}
-.alt{margin-top:10px;font-size:14px;color:var(--muted)}.alt a{margin:0 4px}
-.shot{margin:40px auto 0;border-radius:12px;overflow:hidden;border:1px solid var(--line);box-shadow:0 20px 60px #000a}.shot img{display:block;width:100%;height:auto}
-section{padding:56px 0}h2{font-size:28px;margin:0 0 24px;text-align:center}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px}.card h3{margin:0 0 6px;font-size:17px}.card p{margin:0;color:var(--muted);font-size:15px}
-.steps{counter-reset:s;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
-.steps div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px}.steps div::before{counter-increment:s;content:counter(s);display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;font-weight:700;margin-bottom:8px}
-.free{background:linear-gradient(135deg,#17322a,#1e1e1e);border:1px solid #2a5c48;border-radius:16px;padding:32px;text-align:center}
-.free h2{margin-bottom:10px}.free p{color:var(--muted);max-width:640px;margin:0 auto 18px}
-.btn{display:inline-block;background:var(--fg);color:#111;padding:12px 22px;border-radius:10px;font-weight:600}.btn:hover{text-decoration:none;opacity:.9}
-footer{padding:36px 0;border-top:1px solid var(--line);color:var(--muted);text-align:center;font-size:14px}footer a{margin:0 8px}
+.os svg{width:36px;height:36px;fill:currentColor;margin-bottom:6px}.os b{font-size:19px}.os small{opacity:.75;font-size:13px}
+.alt{margin-top:18px;font-size:14px;color:var(--muted)}.alt a{margin:0 6px}
+.shot{margin:52px auto 0;border-radius:12px;overflow:hidden;border:1px solid var(--line);box-shadow:0 20px 60px #000a}.shot img{display:block;width:100%;height:auto}
+section{padding:64px 0}h2{font-size:28px;margin:0 0 28px;text-align:center}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:22px 24px}
+.card h3{display:flex;align-items:center;gap:12px;margin:0 0 8px;font-size:17px}.card h3 i{font-style:normal;font-size:22px;line-height:1;width:26px;text-align:center}
+.card p{margin:0;color:var(--muted);font-size:15px}
+.trust{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}
+.trust div{background:linear-gradient(135deg,#17322a,#1e1e1e);border:1px solid #2a5c48;border-radius:16px;padding:28px}
+.trust i{font-style:normal;font-size:30px;display:block;margin-bottom:12px}.trust h3{margin:0 0 8px;font-size:20px}.trust p{margin:0;color:var(--muted)}
+.steps{counter-reset:s;display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px}
+.steps div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:22px 24px}
+.steps div::before{counter-increment:s;content:counter(s);display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--accent);color:#fff;font-weight:700;margin-bottom:12px}
+.cta{text-align:center;margin-top:28px}.btn{display:inline-block;background:var(--fg);color:#111;padding:12px 24px;border-radius:10px;font-weight:600}.btn:hover{text-decoration:none;opacity:.9}
+footer{padding:40px 0;border-top:1px solid var(--line);color:var(--muted);text-align:center;font-size:14px}footer a{margin:0 10px}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <nav><b>Twin<span>now</span></b><div><a href="https://github.com/artmedev/twinnow-last">GitHub</a><a href="https://artme.dev/tools">Other tools</a><a href="https://artme.dev">Author</a></div></nav>
+  <nav><span class="logo">Twinnow</span><div><a href="https://github.com/artmedev/twinnow-last">GitHub</a><a href="https://artme.dev/tools">Other tools</a><a href="https://artme.dev">Author</a></div></nav>
 </div>
 
 <header class="wrap">
-  <div class="badges"><span class="badge">100% free</span><span class="badge">Open source</span><span class="badge">No account · no cloud</span></div>
+  <div class="badges"><span class="badge">100% free</span><span class="badge">Open source</span><span class="badge">Runs on your computer</span><span class="badge">Never deletes, only copies</span></div>
   <h1>Keep the <span>best</span> shot.<br>Skip the twins.</h1>
-  <p class="lead">Twinnow finds series of similar photos on your drive, shows them side by side so you can star the best ones, and copies your picks to a new place with the same folder structure.</p>
+  <p class="lead">Twinnow finds series of similar photos on your drive, shows them side by side so you can star the best ones, and copies your picks to a new place with the same folder structure. <b>Your photos never leave your computer, and nothing is ever deleted.</b></p>
   <div class="dl">
     <a class="os" data-os="win" href="https://github.com/artmedev/twinnow-last/releases/download/latest/Twinnow.exe">
       <svg viewBox="0 0 24 24"><path d="M3 5.5 10.5 4.4v7.1H3zm8.5-1.2L21 3v8.5h-9.5zM3 12.5h7.5v7.1L3 18.5zm8.5 0H21V21l-9.5-1.3z"/></svg><b>Windows</b><small>10 / 11 · portable .exe</small></a>
@@ -59,17 +65,24 @@ footer{padding:36px 0;border-top:1px solid var(--line);color:var(--muted);text-a
 </header>
 
 <section class="wrap">
+  <div class="trust">
+    <div><i>🔒</i><h3>Everything stays on your computer</h3><p>Photos are analyzed locally, even the neural network. No uploads, no account, no cloud, no tracking.</p></div>
+    <div><i>🛡️</i><h3>Never deletes anything</h3><p>Twinnow only reads your photos and copies the ones you picked. It never moves, overwrites or deletes a file.</p></div>
+    <div><i>💚</i><h3>Free and open source</h3><p>No ads, no subscription. The full code is on GitHub under the MIT license.</p></div>
+  </div>
+</section>
+
+<section class="wrap">
   <h2>What it does</h2>
   <div class="grid">
-    <div class="card"><h3>📁 Whole drive or one folder</h3><p>Scans a folder or an entire disk and shows every folder with photos as a tree.</p></div>
-    <div class="card"><h3>🧩 Groups similar photos</h3><p>Bursts, retakes and near-duplicates land in one group. Biggest groups come first.</p></div>
-    <div class="card"><h3>🧠 Five similarity methods</h3><p>dHash, pHash, color histogram, capture time and an optional local neural network. Combine them with AND / OR.</p></div>
-    <div class="card"><h3>★ Star the best</h3><p>Pick one or several favorites per group. Folders with favorites are marked as done.</p></div>
-    <div class="card"><h3>✨ Magic mode</h3><p>One click favorites every unique photo plus one from each group of similar shots, across all folders.</p></div>
-    <div class="card"><h3>📤 Safe copy out</h3><p>Copies favorites with the original folder structure. Never overwrites, moves or deletes anything.</p></div>
-    <div class="card"><h3>⏯ Resume anytime</h3><p>Analysis runs in the background with a time estimate. Progress, scores and favorites survive restarts.</p></div>
-    <div class="card"><h3>🔒 100% local</h3><p>Your photos never leave your computer. No account, no cloud, no tracking.</p></div>
-    <div class="card"><h3>🌍 6 languages</h3><p>English, Español, Français, Русский, العربية, 中文.</p></div>
+    <div class="card"><h3><i>📁</i>Whole drive or one folder</h3><p>Scans a folder or an entire disk and shows every folder with photos as a tree.</p></div>
+    <div class="card"><h3><i>🧩</i>Groups similar photos</h3><p>Bursts, retakes and near-duplicates land in one group. Biggest groups come first.</p></div>
+    <div class="card"><h3><i>🧠</i>Five similarity methods</h3><p>dHash, pHash, color histogram, capture time and an optional local neural network. Combine them with AND / OR.</p></div>
+    <div class="card"><h3><i>★</i>Star the best</h3><p>Pick one or several favorites per group. Folders with favorites are marked as done.</p></div>
+    <div class="card"><h3><i>✨</i>Magic mode</h3><p>One click favorites every unique photo plus one from each group of similar shots, across all folders.</p></div>
+    <div class="card"><h3><i>📤</i>Copy out your picks</h3><p>Favorites are copied with the original folder structure. Originals stay exactly where they were.</p></div>
+    <div class="card"><h3><i>⏯</i>Resume anytime</h3><p>Analysis runs in the background with a time estimate. Progress, scores and favorites survive restarts.</p></div>
+    <div class="card"><h3><i>🌍</i>6 languages</h3><p>English, Español, Français, Русский, العربية, 中文.</p></div>
   </div>
 </section>
 
@@ -78,16 +91,9 @@ footer{padding:36px 0;border-top:1px solid var(--line);color:var(--muted);text-a
   <div class="steps">
     <div>Choose a folder or a drive. Twinnow finds all folders with photos.</div>
     <div>Open a folder: similar photos are grouped. Star the best shot in each group, or let Magic mode do it.</div>
-    <div>Press “Copy favorites” and choose where to put them. Folder structure is kept.</div>
+    <div>Press “Copy favorites” and choose where to put them. Folder structure is kept, originals are untouched.</div>
   </div>
-</section>
-
-<section class="wrap">
-  <div class="free">
-    <h2>Free forever. Open source.</h2>
-    <p>No ads, no subscriptions, no sign-up. The full source code is on GitHub under the MIT license: read it, build it yourself, or send improvements.</p>
-    <a class="btn" href="https://github.com/artmedev/twinnow-last">★ Source code on GitHub</a>
-  </div>
+  <div class="cta"><a class="btn" href="https://github.com/artmedev/twinnow-last">★ Source code on GitHub</a></div>
 </section>
 
 <footer class="wrap">

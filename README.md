@@ -1,6 +1,9 @@
 # Twinnow
 
-**Free and open-source** desktop app that finds series of similar photos, lets you star the best shots and copies them out with the folder structure. Runs 100% locally on Windows, macOS and Linux.
+**Free and open-source** desktop app that finds series of similar photos, lets you star the best shots and copies them out with the folder structure. Windows, macOS and Linux.
+
+- 🔒 **Everything stays on your computer.** Photos are analyzed locally (even the neural network): no uploads, no account, no cloud.
+- 🛡️ **Never deletes anything.** Twinnow only reads your photos and copies the ones you picked; originals are never moved, overwritten or deleted.
 
 **🌐 [twinnow.artme.dev](https://twinnow.artme.dev)** · made by [Artem I.](https://artme.dev) · [other tools](https://artme.dev/tools)
 
@@ -27,7 +30,7 @@ Built automatically by GitHub Actions on every push to `main`.
 - Every algorithm's score is saved for every file and shown in the collapsible photo info with EXIF details.
 - Favorites (★, double click, Space/F); folders with favorites are marked as processed.
 - Magic mode: favorites every unique photo and one random photo of each similar group in all folders.
-- Copies favorites preserving folder structure; never overwrites or deletes anything.
+- Copies favorites preserving folder structure; originals stay untouched.
 - Background analysis with ETA; state, feature cache and progress persist between launches.
 - UI languages: English, Español, Français, Русский, العربية, 中文.
 
