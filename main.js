@@ -43,6 +43,7 @@ let rootGen = 0, viewGen = 0;
 ipcMain.handle('scan', async (e, root) => {
   const out = [], gen = ++rootGen;
   Object.assign(state, { root, dirs: out, scanning: true });
+  if (!inRoot(state.ui.curDir || '', root)) state.ui = {}; // the viewed folder belongs to the old root
   async function walk(dir) {
     let ents;
     if (gen !== rootGen) return;
