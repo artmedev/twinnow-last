@@ -5,7 +5,9 @@ import ModelToast from './ModelToast.jsx';
 import Info from './Info.jsx';
 
 const api = window.api;
-const cache = new Map();
+const cache = new Map(); // thumbnails (data URLs), oldest dropped beyond MAX
+const MAX = 1500;
+const remember = (f, s) => { cache.set(f, s); if (cache.size > MAX) cache.delete(cache.keys().next().value); };
 const url = f => 'file://' + (f.startsWith('/') ? '' : '/') + f.replace(/\\/g, '/').split('/').map((s, i) => i ? encodeURIComponent(s) : s).join('/');
 const base = f => f.split(/[\\/]/).pop();
 const fmtTime = s => s >= 3600 ? `${Math.floor(s / 3600)}h ${Math.round(s % 3600 / 60)}m` : s >= 60 ? `${Math.floor(s / 60)}m ${s % 60}s` : `${s}s`;
@@ -16,7 +18,7 @@ function Thumb({ f }) {
   useEffect(() => {
     if (cache.has(f)) return setSrc(cache.get(f));
     let live = true;
-    api.thumb(f).then(s => { cache.set(f, s); live && setSrc(s); });
+    api.thumb(f).then(s => { remember(f, s); live && setSrc(s); });
     return () => { live = false; };
   }, [f]);
   return <img src={src || undefined} />;
