@@ -54,7 +54,7 @@
       "artifactName": "Twinnow.exe"
     },
     "portable": {
-      "artifactName": "BestPhoto.exe"
+      "artifactName": "Twinnow.exe"
     },
     "mac": {
       "target": "dmg",
