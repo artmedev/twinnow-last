@@ -4,7 +4,7 @@
   "main": "main.js",
   "scripts": {
     "start": "vite build && electron .",
-    "dist": "vite build && electron-builder --win portable --publish never"
+    "dist": "vite build && electron-builder --publish never"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.7.0",
@@ -20,15 +20,16 @@
   },
   "productName": "BestPhoto",
   "build": {
-    "directories": { "output": "release" },
+    "directories": {
+      "output": "release"
+    },
     "appId": "com.artmedev.bestphoto",
     "productName": "BestPhoto",
     "files": [
       "main.js",
       "preload.js",
       "lib/**",
-      "dist/**",
-      "!node_modules/onnxruntime-node/bin/napi-v*/{linux,darwin}/**"
+      "dist/**"
     ],
     "asarUnpack": [
       "node_modules/onnxruntime-node/**",
@@ -37,10 +38,42 @@
     ],
     "win": {
       "target": "portable",
-      "signAndEditExecutable": false
+      "signAndEditExecutable": false,
+      "files": [
+        "!node_modules/onnxruntime-node/bin/napi-v*/linux/**",
+        "!node_modules/onnxruntime-node/bin/napi-v*/darwin/**"
+      ]
     },
     "portable": {
       "artifactName": "BestPhoto.exe"
+    },
+    "mac": {
+      "target": "dmg",
+      "identity": null,
+      "category": "public.app-category.photography",
+      "artifactName": "BestPhoto-mac.${ext}",
+      "files": [
+        "!node_modules/onnxruntime-node/bin/napi-v*/win32/**",
+        "!node_modules/onnxruntime-node/bin/napi-v*/linux/**"
+      ]
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb",
+        "rpm"
+      ],
+      "category": "Graphics",
+      "artifactName": "BestPhoto-linux.${ext}",
+      "files": [
+        "!node_modules/onnxruntime-node/bin/napi-v*/win32/**",
+        "!node_modules/onnxruntime-node/bin/napi-v*/darwin/**"
+      ]
     }
-  }
+  },
+  "author": {
+    "name": "artmedev",
+    "email": "artmedev@users.noreply.github.com"
+  },
+  "homepage": "https://github.com/artmedev/bestphoto"
 }
