@@ -1,9 +1,8 @@
 const { app, BrowserWindow, ipcMain, dialog, nativeImage } = require('electron');
 const fs = require('fs'), fsp = fs.promises, path = require('path');
 
-const EXT = new Set(['.jpg', '.jpeg', '.png', '.bmp', '.gif', '.webp', '.tif', '.tiff']);
 const SKIP = new Set(['windows', 'program files', 'program files (x86)', 'programdata', 'appdata', 'node_modules', '$recycle.bin', 'system volume information']);
-const isImg = f => EXT.has(path.extname(f).toLowerCase());
+const { isImg } = require('./lib/analyzer');
 const store = require('./lib/store');
 store.init(app.getPath('userData'));
 const state = store.load('state.json', { root: null, dirs: [], ui: {}, scanning: false });
@@ -47,35 +46,13 @@ ipcMain.handle('scan', async (e, root) => {
   return out;
 });
 
-const hashCache = new Map();
-async function dhash(file) {
-  if (hashCache.has(file)) return hashCache.get(file);
-  let h = null;
-  try {
-    let img = await nativeImage.createThumbnailFromPath(file, { width: 64, height: 64 }).catch(() => null);
-    if (!img || img.isEmpty()) img = nativeImage.createFromPath(file);
-    if (!img.isEmpty()) {
-      const b = img.resize({ width: 9, height: 8, quality: 'good' }).toBitmap(); // BGRA
-      const g = i => b[i * 4] * 0.11 + b[i * 4 + 1] * 0.59 + b[i * 4 + 2] * 0.3;
-      h = [];
-      for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) h.push(g(y * 9 + x) > g(y * 9 + x + 1) ? 1 : 0);
-    }
-  } catch {}
-  hashCache.set(file, h);
-  return h;
-}
-const dist = (a, b) => { let d = 0; for (let i = 0; i < 64; i++) d += a[i] !== b[i]; return d; };
+const { analyzeDir } = require('./lib/analyzer');
+const { group, enabled } = require('./lib/group');
 
 // Group similar photos in folder
 ipcMain.handle('groups', async (e, dir, thr = 12) => {
-  const files = (await fsp.readdir(dir)).filter(isImg).sort((a, b) => a.localeCompare(b, undefined, { numeric: true })).map(f => path.join(dir, f));
-  const groups = [];
-  for (const f of files) {
-    const h = await dhash(f);
-    const g = h && groups.find(g => g.h && dist(g.h, h) <= thr);
-    if (g) g.files.push(f); else groups.push({ h, files: [f] });
-  }
-  return groups.map(g => g.files).sort((a, b) => b.length - a.length);
+  const s = { mode: 'and', m: { dh: { on: true, thr } } };
+  return group(await analyzeDir(dir, enabled(s).map(x => x[0])), s);
 });
 
 ipcMain.handle('thumb', async (e, file) => {
