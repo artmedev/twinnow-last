@@ -114,13 +114,15 @@ ipcMain.handle('info', async (e, f) => {
 // clears all favorites (only the app's list, files are untouched)
 ipcMain.handle('clearFavs', () => {
   for (const k of Object.keys(favs)) delete favs[k];
-  saveFavs();
+  for (const k of Object.keys(magicPicks)) delete magicPicks[k];
+  saveFavs(); store.save('magic.json', magicPicks);
   return favs;
 });
 
 ipcMain.handle('setFav', (e, dir, file, on) => {
   const s = new Set(favs[dir] || []);
   on ? s.add(file) : s.delete(file);
+  if (magicPicks[dir]) magicPicks[dir] = magicPicks[dir].filter(f => f !== file), store.save('magic.json', magicPicks);
   if (s.size) favs[dir] = [...s]; else delete favs[dir];
   saveFavs();
   return favs;
@@ -175,15 +177,16 @@ function analyzeLoop() {
     if (state.running && gen !== rootGen) analyzeLoop(); // restart for the new root
   })();
 }
-// Magic mode: in every folder without favorites, favorite each unique photo and one random photo of each group.
-// Resumable: processed folders get favorites and are skipped next time.
+// Magic mode: in every folder, favorite each unique photo and one random photo of each group that has no favorite yet.
+// Its own previous picks (magic.json) are replaced on every run; favorites set by hand are kept.
+const magicPicks = store.load('magic.json', {});
 let magicBusy = false;
 ipcMain.handle('magic', async e => {
   if (magicBusy) return null;
   magicBusy = true;
   let added = 0, dirs = 0;
   try {
-    const keys = needed(state.settings), list = state.dirs.filter(d => !favs[d.dir]), gen = rootGen;
+    const keys = needed(state.settings), list = state.dirs, gen = rootGen;
     for (const [i, d] of list.entries()) {
       if (gen !== rootGen) break;
       e.sender.send('magicProgress', { i, n: list.length, dir: d.dir });
@@ -192,9 +195,15 @@ ipcMain.handle('magic', async e => {
       markDone(d.dir, keys, items);
       const r = group(items, state.settings);
       setLast(d.dir, r);
-      favs[d.dir] = r.groups.map(g => g[Math.floor(Math.random() * g.length)]);
-      added += favs[d.dir].length; dirs++; saveFavs();
-      e.sender.send('magicDir', { dir: d.dir, list: favs[d.dir] }); // live: folder processed + its favorites
+      const prev = new Set(magicPicks[d.dir] || []);
+      const manual = new Set((favs[d.dir] || []).filter(f => !prev.has(f)));
+      const picks = r.groups.filter(g => !g.some(f => manual.has(f))).map(g => g[Math.floor(Math.random() * g.length)]);
+      const all = [...manual, ...picks];
+      if (all.length) favs[d.dir] = all; else delete favs[d.dir];
+      magicPicks[d.dir] = picks;
+      added += picks.length; dirs++;
+      saveFavs(); store.save('magic.json', magicPicks);
+      e.sender.send('magicDir', { dir: d.dir, list: favs[d.dir] || [] }); // live: folder processed + its favorites
     }
   } finally { magicBusy = false; e.sender.send('magicProgress', null); }
   return { added, dirs, favs };
