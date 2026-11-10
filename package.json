@@ -29,7 +29,15 @@
       "main.js",
       "preload.js",
       "lib/**",
-      "dist/**"
+      "dist/**",
+      "!node_modules/onnxruntime-web/**",
+      "!node_modules/@huggingface/transformers/dist/*.map",
+      "!node_modules/@huggingface/transformers/dist/*.wasm",
+      "!node_modules/@huggingface/transformers/dist/transformers.{js,min.js,web.js,web.min.js,node.min.cjs,node.min.mjs}",
+      "!node_modules/@huggingface/transformers/{src,types}/**",
+      "!node_modules/onnxruntime-node/bin/napi-v*/*/arm64/**",
+      "!node_modules/onnxruntime-node/bin/napi-v*/win32/x64/DirectML.dll",
+      "!**/*.{map,md,d.ts}"
     ],
     "asarUnpack": [
       "node_modules/onnxruntime-node/**",
@@ -49,7 +57,7 @@
     },
     "mac": {
       "target": "dmg",
-      "identity": null,
+      "identity": "-",
       "category": "public.app-category.photography",
       "artifactName": "BestPhoto-mac.${ext}",
       "files": [
