@@ -89,5 +89,6 @@
     "name": "artmedev",
     "email": "artmedev@users.noreply.github.com"
   },
-  "homepage": "https://twinnow.artme.dev"
+  "homepage": "https://twinnow.artme.dev",
+  "license": "MIT"
 }
