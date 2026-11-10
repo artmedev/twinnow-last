@@ -73,6 +73,12 @@ export default function App() {
     setTree(buildTree(d, dirs));
   };
 
+  const copy = async () => {
+    if (!Object.keys(favs).length) return alert('Нет избранных фото');
+    const r = await api.copyFavs(root); if (!r) return;
+    alert(`Скопировано: ${r.copied}\nУже существовало (пропущено): ${r.skipped}\nОшибок: ${r.errors}\n→ ${r.dest}`);
+  };
+
   const openGroup = (gs, i) => { setGi(i); setCur(gs[i]?.[0] || null); };
   const open = async (dir, t = thr) => {
     setCurDir(dir); setGroups(null);
@@ -102,6 +108,7 @@ export default function App() {
     <div id="app">
       <div id="bar">
         <button onClick={pick}>Выбрать папку / диск…</button>
+        <button onClick={copy}>Копировать избранные…</button>
         <label>Порог похожести <input type="range" min="2" max="24" value={thr}
           onChange={e => setThr(+e.target.value)} onMouseUp={() => curDir && open(curDir, thr)} /> {thr}</label>
         <span>{status}</span>

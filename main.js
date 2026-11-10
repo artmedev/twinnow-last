@@ -89,3 +89,21 @@ ipcMain.handle('setFav', (e, dir, file, on) => {
   return favs;
 });
 
+// Copy favorites keeping folder structure (relative to root, or to drive root if outside). Never overwrites.
+ipcMain.handle('copyFavs', async (e, root) => {
+  const r = await dialog.showOpenDialog({ properties: ['openDirectory', 'createDirectory'], title: 'Куда копировать избранные' });
+  if (r.canceled) return null;
+  const dest = r.filePaths[0];
+  let copied = 0, skipped = 0, errors = 0;
+  for (const files of Object.values(favs)) for (const f of files) {
+    let rel = root ? path.relative(root, f) : '';
+    if (!rel || rel.startsWith('..') || path.isAbsolute(rel)) rel = path.join(path.parse(f).root.replace(/[:\\\/]/g, ''), path.relative(path.parse(f).root, f));
+    const t = path.join(dest, rel);
+    try {
+      await fsp.mkdir(path.dirname(t), { recursive: true });
+      await fsp.copyFile(f, t, fs.constants.COPYFILE_EXCL);
+      copied++;
+    } catch (err) { err.code === 'EEXIST' ? skipped++ : errors++; }
+  }
+  return { dest, copied, skipped, errors };
+});
