@@ -67,7 +67,7 @@ ipcMain.handle('groups', async (e, dir, thr = 12) => {
     const g = h && groups.find(g => g.h && dist(g.h, h) <= thr);
     if (g) g.files.push(f); else groups.push({ h, files: [f] });
   }
-  return groups.map(g => g.files);
+  return groups.map(g => g.files).sort((a, b) => b.length - a.length);
 });
 
 ipcMain.handle('thumb', async (e, file) => {
