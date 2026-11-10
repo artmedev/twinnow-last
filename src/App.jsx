@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import Settings from './Settings.jsx';
 import { t, LangSwitch } from './i18n.jsx';
 
@@ -61,6 +61,8 @@ export default function App() {
   const [scores, setScores] = useState({});
   const [gi, setGi] = useState(0);
   const [cur, setCur] = useState(null);
+  const now = useRef({});
+  now.current = { curDir, cur };
   const [settings, setSettings] = useState(null);
   const [showSet, setShowSet] = useState(false);
   const [prog, setProg] = useState(null);
@@ -105,13 +107,19 @@ export default function App() {
   };
 
   const openGroup = (gs, i) => { setGi(i); setCur(gs[i]?.[0] || null); };
+  // show saved (or provisional) groups at once, then fresh ones; keep the group of the viewed photo selected
+  const show = (r, keep) => {
+    setGroups(r.groups); setScores(r.scores);
+    let i = r.groups.findIndex(g => g.includes(keep?.cur));
+    if (i < 0) i = r.groups[keep?.gi] ? keep.gi : 0;
+    setGi(i); setCur(r.groups[i]?.includes(keep?.cur) ? keep.cur : r.groups[i]?.[0] || null);
+  };
   const open = async (dir, keep) => {
-    setCurDir(dir); setGroups(null);
-    const { groups: gs, scores } = await api.groups(dir);
-    setGroups(gs); setScores(scores);
-    const i = keep && gs[keep.gi] ? keep.gi : 0;
-    openGroup(gs, i);
-    if (keep && gs[i].includes(keep.cur)) setCur(keep.cur);
+    setCurDir(dir); now.current.curDir = dir; setGroups(null);
+    const q = await api.groupsQuick(dir);
+    if (now.current.curDir === dir) show(q, keep);
+    const r = await api.groups(dir);
+    if (now.current.curDir === dir) show(r, { cur: now.current.cur, gi: keep?.gi });
   };
 
   const favSet = useMemo(() => new Set(favs[curDir] || []), [favs, curDir]);
@@ -143,7 +151,7 @@ export default function App() {
         <span>{status}</span>
         <LangSwitch onChange={setLang} />
       </div>
-      {showSet && settings && <Settings value={settings} onApply={async s => { await api.setSettings(s); setSettings(s); loadDone(); setShowSet(false); curDir && open(curDir, { gi: 0 }); }} />}
+      {showSet && settings && <Settings value={settings} onApply={async s => { await api.setSettings(s); setSettings(s); loadDone(); setShowSet(false); curDir && open(curDir, { cur }); }} />}
       <div id="main">
         <div id="tree">{tree && <TreeNode name={root} node={tree} favs={favs} curDir={curDir} open={open} done={done} />}</div>
         <div id="right">

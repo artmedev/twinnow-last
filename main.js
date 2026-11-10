@@ -48,7 +48,7 @@ ipcMain.handle('scan', async (e, root) => {
   return out;
 });
 
-const { analyzeDir, setLast } = require('./lib/analyzer');
+const { analyzeDir, setLast, getLast } = require('./lib/analyzer');
 const embed = require('./lib/embed');
 const { group, needed: neededFor, DEFAULTS } = require('./lib/group');
 const needed = s => neededFor(s.m.em.on || embed.isReady());
@@ -62,6 +62,9 @@ ipcMain.handle('groups', async (e, dir) => {
   setLast(dir, r);
   return r;
 });
+// instant result: last saved grouping, or all photos as one provisional group
+ipcMain.handle('groupsQuick', async (e, dir) => getLast(dir) ||
+  { groups: [(await fsp.readdir(dir)).filter(isImg).sort((a, b) => a.localeCompare(b, undefined, { numeric: true })).map(f => path.join(dir, f))], scores: {} });
 ipcMain.handle('setSettings', (e, s) => { state.settings = s; saveState(); });
 
 ipcMain.handle('thumb', async (e, file) => {
