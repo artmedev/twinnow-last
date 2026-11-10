@@ -79,10 +79,8 @@
       ]
     },
     "rpm": {
-      "compression": "xz",
       "fpm": [
-        "--rpm-rpmbuild-define=_build_id_links none",
-        "--verbose"
+        "--rpm-rpmbuild-define=_build_id_links none"
       ]
     }
   },
