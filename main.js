@@ -111,6 +111,13 @@ ipcMain.handle('info', async (e, f) => {
     exp: x.ExposureTime, f: x.FNumber, iso: x.ISO, focal: x.FocalLength, lat: x.latitude, lon: x.longitude };
 });
 
+// clears all favorites (only the app's list, files are untouched)
+ipcMain.handle('clearFavs', () => {
+  for (const k of Object.keys(favs)) delete favs[k];
+  saveFavs();
+  return favs;
+});
+
 ipcMain.handle('setFav', (e, dir, file, on) => {
   const s = new Set(favs[dir] || []);
   on ? s.add(file) : s.delete(file);
