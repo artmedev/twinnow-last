@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
 const api = window.api;
 const cache = new Map();
@@ -30,10 +30,12 @@ function buildTree(root, dirs) {
   return t;
 }
 
-function TreeNode({ name, node, curDir, open }) {
+function TreeNode({ name, node, favs, curDir, open }) {
   const kids = Object.entries(node.kids).sort(byName);
+  const f = favs[node.dir];
   const label = (
-    <div className={'node' + (node.dir === curDir ? ' sel' : '')}
+    <div className={'node' + (f ? ' done' : '') + (node.dir === curDir ? ' sel' : '')}
+      title={f ? `Обработана: избранных ${f.length}` : ''}
       onClick={e => { if (node.n) { e.preventDefault(); open(node.dir); } }}>
       {name}{node.n ? ` (${node.n})` : ''}
     </div>
@@ -42,7 +44,7 @@ function TreeNode({ name, node, curDir, open }) {
   return (
     <details open>
       <summary>{label}</summary>
-      {kids.map(([k, v]) => <TreeNode key={k} name={k} node={v} curDir={curDir} open={open} />)}
+      {kids.map(([k, v]) => <TreeNode key={k} name={k} node={v} favs={favs} curDir={curDir} open={open} />)}
     </details>
   );
 }
@@ -51,13 +53,17 @@ export default function App() {
   const [root, setRoot] = useState(null);
   const [tree, setTree] = useState(null);
   const [status, setStatus] = useState('');
+  const [favs, setFavs] = useState({});
   const [curDir, setCurDir] = useState(null);
   const [groups, setGroups] = useState(null);
   const [gi, setGi] = useState(0);
   const [cur, setCur] = useState(null);
   const [thr, setThr] = useState(12);
 
-  useEffect(() => { api.onScan(n => setStatus(`Сканирование… папок с фото: ${n}`)); }, []);
+  useEffect(() => {
+    api.getFavs().then(setFavs);
+    api.onScan(n => setStatus(`Сканирование… папок с фото: ${n}`));
+  }, []);
 
   const pick = async () => {
     const d = await api.pickDir(); if (!d) return;
@@ -74,6 +80,8 @@ export default function App() {
     setGroups(gs); openGroup(gs, 0);
   };
 
+  const favSet = useMemo(() => new Set(favs[curDir] || []), [favs, curDir]);
+  const toggle = async f => f && setFavs(await api.setFav(curDir, f, !favSet.has(f)));
   const g = groups?.[gi] || [];
 
   useEffect(() => {
@@ -84,6 +92,7 @@ export default function App() {
       else if (e.key === 'ArrowLeft' && i > 0) setCur(g[i - 1]);
       else if (e.key === 'ArrowDown' && gi < groups.length - 1) openGroup(groups, gi + 1);
       else if (e.key === 'ArrowUp' && gi > 0) openGroup(groups, gi - 1);
+      else if (e.key === ' ' || e.key.toLowerCase() === 'f') { e.preventDefault(); toggle(cur); }
     };
     window.addEventListener('keydown', h);
     return () => window.removeEventListener('keydown', h);
@@ -98,12 +107,13 @@ export default function App() {
         <span>{status}</span>
       </div>
       <div id="main">
-        <div id="tree">{tree && <TreeNode name={root} node={tree} curDir={curDir} open={open} />}</div>
+        <div id="tree">{tree && <TreeNode name={root} node={tree} favs={favs} curDir={curDir} open={open} />}</div>
         <div id="right">
           <div id="groups">
             {curDir && !groups && 'Группировка…'}
             {groups?.map((gr, i) => (
-              <div key={gr[0]} className={'grp' + (i === gi ? ' sel' : '')} onClick={() => openGroup(groups, i)}>
+              <div key={gr[0]} className={'grp' + (i === gi ? ' sel' : '') + (gr.some(f => favSet.has(f)) ? ' hasfav' : '')}
+                onClick={() => openGroup(groups, i)}>
                 <Thumb f={gr[0]} /><span>{gr.length}</span>
               </div>
             ))}
@@ -111,8 +121,10 @@ export default function App() {
           <div id="bottom">
             <div id="grid">
               {g.map(f => (
-                <div key={f} className={'ph' + (f === cur ? ' cur' : '')} title={base(f)} onClick={() => setCur(f)}>
-                  <Thumb f={f} />
+                <div key={f} className={'ph' + (f === cur ? ' cur' : '') + (favSet.has(f) ? ' fav' : '')}
+                  title={base(f) + '\nКлик — просмотр, ★ или двойной клик — избранное'}
+                  onClick={() => setCur(f)} onDoubleClick={() => toggle(f)}>
+                  <Thumb f={f} /><b onClick={e => { e.stopPropagation(); toggle(f); }}>★</b>
                 </div>
               ))}
             </div>

@@ -4,6 +4,10 @@ const fs = require('fs'), fsp = fs.promises, path = require('path');
 const EXT = new Set(['.jpg', '.jpeg', '.png', '.bmp', '.gif', '.webp', '.tif', '.tiff']);
 const SKIP = new Set(['windows', 'program files', 'program files (x86)', 'programdata', 'appdata', 'node_modules', '$recycle.bin', 'system volume information']);
 const isImg = f => EXT.has(path.extname(f).toLowerCase());
+const favFile = () => path.join(app.getPath('userData'), 'favorites.json');
+let favs = {};
+try { favs = JSON.parse(fs.readFileSync(favFile(), 'utf8')); } catch {}
+const saveFavs = () => fs.writeFileSync(favFile(), JSON.stringify(favs, null, 1));
 
 app.whenReady().then(() => {
   const w = new BrowserWindow({ width: 1400, height: 900, webPreferences: { preload: path.join(__dirname, 'preload.js') } });
@@ -74,5 +78,14 @@ ipcMain.handle('thumb', async (e, file) => {
     const img = nativeImage.createFromPath(file);
     return img.isEmpty() ? '' : img.resize({ height: 160 }).toDataURL();
   }
+});
+
+ipcMain.handle('getFavs', () => favs);
+ipcMain.handle('setFav', (e, dir, file, on) => {
+  const s = new Set(favs[dir] || []);
+  on ? s.add(file) : s.delete(file);
+  if (s.size) favs[dir] = [...s]; else delete favs[dir];
+  saveFavs();
+  return favs;
 });
 
