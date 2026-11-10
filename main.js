@@ -14,10 +14,12 @@ app.on('before-quit', store.flush);
 ipcMain.handle('getState', () => ({ ...state, favs }));
 ipcMain.handle('setUi', (e, ui) => { state.ui = ui; saveState(); });
 
+let win;
 app.whenReady().then(() => {
-  const w = new BrowserWindow({ width: 1400, height: 900, webPreferences: { preload: path.join(__dirname, 'preload.js') } });
-  w.setMenuBarVisibility(false);
-  w.loadFile(path.join(__dirname, 'dist', 'index.html'));
+  win = new BrowserWindow({ width: 1400, height: 900, webPreferences: { preload: path.join(__dirname, 'preload.js') } });
+  win.setMenuBarVisibility(false);
+  win.webContents.on('did-finish-load', () => state.running ? analyzeLoop() : progress());
+  win.loadFile(path.join(__dirname, 'dist', 'index.html'));
 });
 app.on('window-all-closed', () => app.quit());
 
@@ -51,7 +53,11 @@ const { group, needed, DEFAULTS } = require('./lib/group');
 state.settings = { ...DEFAULTS, ...state.settings, m: { ...DEFAULTS.m, ...state.settings?.m } };
 
 // Group similar photos in folder
-ipcMain.handle('groups', async (e, dir) => group(await analyzeDir(dir, needed(state.settings)), state.settings));
+ipcMain.handle('groups', async (e, dir) => {
+  const keys = needed(state.settings), items = await analyzeDir(dir, keys);
+  markDone(dir, keys, items);
+  return group(items, state.settings);
+});
 ipcMain.handle('setSettings', (e, s) => { state.settings = s; saveState(); });
 
 ipcMain.handle('thumb', async (e, file) => {
@@ -90,3 +96,33 @@ ipcMain.handle('copyFavs', async (e, root) => {
   }
   return { dest, copied, skipped, errors };
 });
+
+// Background analysis of all folders. Progress persists in state.done (dir -> computed feature keys) and resumes on restart.
+state.done ||= {};
+let loop = null;
+const isDone = (dir, keys) => keys.every(k => state.done[dir]?.includes(k));
+const complete = (items, keys) => items.every(it => keys.every(k => it[k] !== undefined));
+function markDone(dir, keys, items) {
+  if (!complete(items, keys)) return false;
+  state.done[dir] = [...new Set([...(state.done[dir] || []), ...keys])];
+  saveState(); win?.webContents.send('dirDone', dir);
+  return true;
+}
+function progress(extra) {
+  const keys = needed(state.settings);
+  win?.webContents.send('progress', { running: state.running, done: state.dirs.filter(d => isDone(d.dir, keys)).length, total: state.dirs.length, ...extra });
+}
+function analyzeLoop() {
+  loop ||= (async () => {
+    let error;
+    while (state.running) {
+      const keys = needed(state.settings), d = state.dirs.find(d => !isDone(d.dir, keys));
+      if (!d) break;
+      const items = await analyzeDir(d.dir, keys, (i, n) => progress({ dir: d.dir, i, n })).catch(() => []);
+      if (!markDone(d.dir, keys, items)) { error = 'Не удалось вычислить признаки (нет сети для загрузки модели?)'; break; }
+    }
+    loop = null; progress({ error });
+  })();
+}
+ipcMain.handle('setRunning', (e, on) => { state.running = on; saveState(); on ? analyzeLoop() : progress(); });
+ipcMain.handle('doneDirs', () => state.dirs.map(d => d.dir).filter(d => isDone(d, needed(state.settings))));

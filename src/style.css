@@ -20,3 +20,4 @@ button{background:#3a3a3a;color:#ddd;border:1px solid #555;padding:4px 10px;curs
 #settings{padding:6px 10px;background:#252525;border-bottom:1px solid #444;display:flex;flex-wrap:wrap;gap:6px 24px}
 #settings .meth{display:flex;gap:8px;align-items:center}#settings .meth label{min-width:200px}
 select{background:#3a3a3a;color:#ddd;border:1px solid #555}
+#tree .todo{opacity:.55}

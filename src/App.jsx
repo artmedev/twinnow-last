@@ -31,11 +31,11 @@ function buildTree(root, dirs) {
   return t;
 }
 
-function TreeNode({ name, node, favs, curDir, open }) {
+function TreeNode({ name, node, favs, curDir, open, done }) {
   const kids = Object.entries(node.kids).sort(byName);
   const f = favs[node.dir];
   const label = (
-    <div className={'node' + (f ? ' done' : '') + (node.dir === curDir ? ' sel' : '')}
+    <div className={'node' + (f ? ' done' : '') + (node.dir === curDir ? ' sel' : '') + (node.n && !done.has(node.dir) ? ' todo' : '')}
       title={f ? `Обработана: избранных ${f.length}` : ''}
       onClick={e => { if (node.n) { e.preventDefault(); open(node.dir); } }}>
       {name}{node.n ? ` (${node.n})` : ''}
@@ -45,7 +45,7 @@ function TreeNode({ name, node, favs, curDir, open }) {
   return (
     <details open>
       <summary>{label}</summary>
-      {kids.map(([k, v]) => <TreeNode key={k} name={k} node={v} favs={favs} curDir={curDir} open={open} />)}
+      {kids.map(([k, v]) => <TreeNode key={k} name={k} node={v} favs={favs} curDir={curDir} open={open} done={done} />)}
     </details>
   );
 }
@@ -61,17 +61,23 @@ export default function App() {
   const [cur, setCur] = useState(null);
   const [settings, setSettings] = useState(null);
   const [showSet, setShowSet] = useState(false);
+  const [prog, setProg] = useState(null);
+  const [done, setDone] = useState(new Set());
+  const loadDone = () => api.doneDirs().then(d => setDone(new Set(d)));
 
   const scan = async d => {
     setRoot(d);
     const dirs = await api.scan(d);
     setStatus(`Папок с фото: ${dirs.length}`);
-    setTree(buildTree(d, dirs));
+    setTree(buildTree(d, dirs)); loadDone();
   };
 
   // restore previous session
   useEffect(() => {
     api.onScan(n => setStatus(`Сканирование… папок с фото: ${n}`));
+    api.onProgress(setProg);
+    api.onDirDone(d => setDone(s => new Set(s).add(d)));
+    loadDone();
     api.getState().then(s => {
       setFavs(s.favs); setSettings(s.settings);
       if (!s.root) return;
@@ -129,11 +135,13 @@ export default function App() {
         <button onClick={pick}>Выбрать папку / диск…</button>
         <button onClick={copy}>Копировать избранные…</button>
         <button onClick={() => setShowSet(!showSet)}>Алгоритм похожести…</button>
+        <button onClick={() => api.setRunning(!prog?.running)}>{prog?.running ? '⏸ Пауза анализа' : '▶ Анализ всех папок'}</button>
+        <span>{prog && `Проанализировано папок: ${prog.done}/${prog.total}` + (prog.running && prog.dir ? ` · ${base(prog.dir)} ${prog.i}/${prog.n}` : '') + (prog.error ? ` · ${prog.error}` : '')}</span>
         <span>{status}</span>
       </div>
-      {showSet && settings && <Settings value={settings} onApply={async s => { await api.setSettings(s); setSettings(s); setShowSet(false); curDir && open(curDir, { gi: 0 }); }} />}
+      {showSet && settings && <Settings value={settings} onApply={async s => { await api.setSettings(s); setSettings(s); loadDone(); setShowSet(false); curDir && open(curDir, { gi: 0 }); }} />}
       <div id="main">
-        <div id="tree">{tree && <TreeNode name={root} node={tree} favs={favs} curDir={curDir} open={open} />}</div>
+        <div id="tree">{tree && <TreeNode name={root} node={tree} favs={favs} curDir={curDir} open={open} done={done} />}</div>
         <div id="right">
           <div id="groups">
             {curDir && !groups && 'Группировка…'}
