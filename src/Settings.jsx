@@ -1,11 +1,12 @@
 import { useState } from 'react';
+import { t } from './i18n.jsx';
 
 const META = {
-  dh: { name: 'dHash — градиент яркости', min: 0, max: 32, unit: 'бит различий ≤' },
-  ph: { name: 'pHash — частоты (DCT)', min: 0, max: 32, unit: 'бит различий ≤' },
-  hi: { name: 'Цвета — гистограмма', min: 2, max: 60, unit: '% различий ≤' },
-  t: { name: 'Время съёмки', min: 1, max: 600, unit: 'сек между кадрами ≤' },
-  em: { name: 'Нейросеть (CLIP)', min: 60, max: 99, unit: '% сходства ≥' },
+  dh: { min: 0, max: 32, unit: 'u_bits' },
+  ph: { min: 0, max: 32, unit: 'u_bits' },
+  hi: { min: 2, max: 60, unit: 'u_pct' },
+  t: { min: 1, max: 600, unit: 'u_sec' },
+  em: { min: 60, max: 99, unit: 'u_sim' },
 };
 
 export default function Settings({ value, onApply }) {
@@ -15,19 +16,18 @@ export default function Settings({ value, onApply }) {
     <div id="settings">
       {Object.entries(META).map(([k, m]) => (
         <div key={k} className="meth">
-          <label><input type="checkbox" checked={s.m[k].on} onChange={e => setM(k, { on: e.target.checked })} /> {m.name}</label>
+          <label><input type="checkbox" checked={s.m[k].on} onChange={e => setM(k, { on: e.target.checked })} /> {t('m_' + k)}</label>
           <input type="range" min={m.min} max={m.max} value={s.m[k].thr} disabled={!s.m[k].on}
             onChange={e => setM(k, { thr: +e.target.value })} />
-          <span>{m.unit} {s.m[k].thr}</span>
+          <span>{t(m.unit)} {s.m[k].thr}</span>
         </div>
       ))}
       <div className="meth">
-        <label>Комбинация: <select value={s.mode} onChange={e => setS({ ...s, mode: e.target.value })}>
-          <option value="and">все отмеченные (И)</option>
-          <option value="or">любой из отмеченных (ИЛИ)</option>
+        <label>{t('combo')} <select value={s.mode} onChange={e => setS({ ...s, mode: e.target.value })}>
+          <option value="and">{t('and')}</option>
+          <option value="or">{t('or')}</option>
         </select></label>
-        <button onClick={() => onApply(s)}>Применить</button>
-        {s.m.em.on && <small>Нейросеть: при первом запуске скачивается модель (~90 МБ)</small>}
+        <button onClick={() => onApply(s)}>{t('apply')}</button>
       </div>
     </div>
   );

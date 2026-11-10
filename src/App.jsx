@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import Settings from './Settings.jsx';
+import { t, LangSwitch } from './i18n.jsx';
 
 const api = window.api;
 const cache = new Map();
@@ -36,7 +37,7 @@ function TreeNode({ name, node, favs, curDir, open, done }) {
   const f = favs[node.dir];
   const label = (
     <div className={'node' + (f ? ' done' : '') + (node.dir === curDir ? ' sel' : '') + (node.n && !done.has(node.dir) ? ' todo' : '')}
-      title={f ? `Обработана: избранных ${f.length}` : ''}
+      title={f ? t('processed', f.length) : ''}
       onClick={e => { if (node.n) { e.preventDefault(); open(node.dir); } }}>
       {name}{node.n ? ` (${node.n})` : ''}
     </div>
@@ -64,18 +65,19 @@ export default function App() {
   const [showSet, setShowSet] = useState(false);
   const [prog, setProg] = useState(null);
   const [done, setDone] = useState(new Set());
+  const [, setLang] = useState();
   const loadDone = () => api.doneDirs().then(d => setDone(new Set(d)));
 
   const scan = async d => {
     setRoot(d);
     const dirs = await api.scan(d);
-    setStatus(`Папок с фото: ${dirs.length}`);
+    setStatus(t('folders', dirs.length));
     setTree(buildTree(d, dirs)); loadDone();
   };
 
   // restore previous session
   useEffect(() => {
-    api.onScan(n => setStatus(`Сканирование… папок с фото: ${n}`));
+    api.onScan(n => setStatus(t('scanning', n)));
     api.onProgress(setProg);
     api.onDirDone(d => setDone(s => new Set(s).add(d)));
     loadDone();
@@ -97,9 +99,9 @@ export default function App() {
   useEffect(() => { if (curDir) api.setUi({ curDir, gi, cur }); }, [curDir, gi, cur]);
 
   const copy = async () => {
-    if (!Object.keys(favs).length) return alert('Нет избранных фото');
-    const r = await api.copyFavs(root); if (!r) return;
-    alert(`Скопировано: ${r.copied}\nУже существовало (пропущено): ${r.skipped}\nОшибок: ${r.errors}\n→ ${r.dest}`);
+    if (!Object.keys(favs).length) return alert(t('noFavs'));
+    const r = await api.copyFavs(root, t('copyTitle')); if (!r) return;
+    alert(t('copied', r.copied, r.skipped, r.errors, r.dest));
   };
 
   const openGroup = (gs, i) => { setGi(i); setCur(gs[i]?.[0] || null); };
@@ -133,19 +135,20 @@ export default function App() {
   return (
     <div id="app">
       <div id="bar">
-        <button onClick={pick}>Выбрать папку / диск…</button>
-        <button onClick={copy}>Копировать избранные…</button>
-        <button onClick={() => setShowSet(!showSet)}>Алгоритм похожести…</button>
-        <button onClick={() => api.setRunning(!prog?.running)}>{prog?.running ? '⏸ Пауза анализа' : '▶ Анализ всех папок'}</button>
-        <span>{prog && `Проанализировано папок: ${prog.done}/${prog.total}` + (prog.running && prog.dir ? ` · ${base(prog.dir)} ${prog.i}/${prog.n}` : '') + (prog.error ? ` · ${prog.error}` : '')}</span>
+        <button onClick={pick}>{t('pick')}</button>
+        <button onClick={copy}>{t('copy')}</button>
+        <button onClick={() => setShowSet(!showSet)}>{t('algo')}</button>
+        <button onClick={() => api.setRunning(!prog?.running)}>{prog?.running ? t('pause') : t('run')}</button>
+        <span>{prog && t('analyzed', prog.done, prog.total) + (prog.running && prog.dir ? ` · ${base(prog.dir)} ${prog.i}/${prog.n}` : '') + (prog.error ? ' · ' + t(prog.error) : '')}</span>
         <span>{status}</span>
+        <LangSwitch onChange={setLang} />
       </div>
       {showSet && settings && <Settings value={settings} onApply={async s => { await api.setSettings(s); setSettings(s); loadDone(); setShowSet(false); curDir && open(curDir, { gi: 0 }); }} />}
       <div id="main">
         <div id="tree">{tree && <TreeNode name={root} node={tree} favs={favs} curDir={curDir} open={open} done={done} />}</div>
         <div id="right">
           <div id="groups">
-            {curDir && !groups && 'Группировка…'}
+            {curDir && !groups && t('grouping')}
             {groups?.map((gr, i) => (
               <div key={gr[0]} className={'grp' + (i === gi ? ' sel' : '') + (gr.some(f => favSet.has(f)) ? ' hasfav' : '')}
                 onClick={() => openGroup(groups, i)}>
@@ -157,7 +160,7 @@ export default function App() {
             <div id="grid">
               {g.map(f => (
                 <div key={f} className={'ph' + (f === cur ? ' cur' : '') + (favSet.has(f) ? ' fav' : '')}
-                  title={base(f) + '\nКлик — просмотр, ★ или двойной клик — избранное'}
+                  title={base(f) + '\n' + t('hint')}
                   onClick={() => setCur(f)} onDoubleClick={() => toggle(f)}>
                   <Thumb f={f} /><b onClick={e => { e.stopPropagation(); toggle(f); }}>★</b>
                 </div>

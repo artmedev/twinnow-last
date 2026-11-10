@@ -21,3 +21,6 @@ button{background:#3a3a3a;color:#ddd;border:1px solid #555;padding:4px 10px;curs
 #settings .meth{display:flex;gap:8px;align-items:center}#settings .meth label{min-width:200px}
 select{background:#3a3a3a;color:#ddd;border:1px solid #555}
 #tree .todo{opacity:.55}
+#lang{position:relative;margin-inline-start:auto}#lang button{padding:3px 6px;line-height:0}
+#lang .menu{position:absolute;inset-inline-end:0;top:100%;background:#2a2a2a;border:1px solid #555;z-index:10}
+#lang .menu div{padding:4px 10px;cursor:pointer;white-space:nowrap;display:flex;gap:6px;align-items:center}#lang .menu div:hover{background:#3a3a3a}

@@ -83,8 +83,8 @@ ipcMain.handle('setFav', (e, dir, file, on) => {
 });
 
 // Copy favorites keeping folder structure (relative to root, or to drive root if outside). Never overwrites.
-ipcMain.handle('copyFavs', async (e, root) => {
-  const r = await dialog.showOpenDialog({ properties: ['openDirectory', 'createDirectory'], title: 'Куда копировать избранные' });
+ipcMain.handle('copyFavs', async (e, root, title) => {
+  const r = await dialog.showOpenDialog({ properties: ['openDirectory', 'createDirectory'], title });
   if (r.canceled) return null;
   const dest = r.filePaths[0];
   let copied = 0, skipped = 0, errors = 0;
@@ -123,7 +123,7 @@ function analyzeLoop() {
       const keys = needed(state.settings), d = state.dirs.find(d => !isDone(d.dir, keys));
       if (!d) break;
       const items = await analyzeDir(d.dir, keys, (i, n) => progress({ dir: d.dir, i, n })).catch(() => []);
-      if (!markDone(d.dir, keys, items)) { error = 'Не удалось вычислить признаки (нет сети для загрузки модели?)'; break; }
+      if (!markDone(d.dir, keys, items)) { error = 'errFeatures'; break; }
     }
     loop = null; progress({ error });
   })();
