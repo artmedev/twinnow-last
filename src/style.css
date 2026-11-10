@@ -15,11 +15,13 @@ button{background:#3a3a3a;color:#ddd;border:1px solid #555;padding:4px 10px;curs
 #grid{width:45%;overflow:auto;display:flex;flex-wrap:wrap;align-content:flex-start;gap:6px;padding:6px;border-right:1px solid #444}
 .ph{position:relative;cursor:pointer;border:2px solid transparent}.ph.cur{border-color:#4af}
 .ph img{height:130px;display:block}.ph b{position:absolute;left:2px;top:0;font-size:20px;color:#888;text-shadow:0 0 3px #000}.ph.fav b{color:#fc3}
-#view{flex:1;display:flex;min-width:0}
-#view .pic{flex:1;display:flex;align-items:center;justify-content:center;min-width:0;padding:6px}#view img{max-width:100%;max-height:100%;object-fit:contain}
-#info{width:220px;flex:none;overflow:auto;padding:8px;border-inline-start:1px solid #444;font-size:12px;line-height:1.5}
-#info .name{font-weight:600;word-break:break-all;margin-bottom:6px}#info b{display:block;color:#888;font-weight:400;font-size:11px;margin-top:4px}
-#info .path{color:#777;word-break:break-all;margin-top:8px;font-size:11px}
+#view{flex:1;display:flex;flex-direction:column;min-width:0}
+#view .pic{flex:1;display:flex;align-items:center;justify-content:center;min-height:0;padding:6px}#view img{max-width:100%;max-height:100%;object-fit:contain}
+#info{flex:none;border-top:1px solid #444;font-size:12px;max-height:45%;overflow:auto}
+#info .sum{display:flex;gap:8px;align-items:baseline;padding:5px 10px;cursor:pointer;white-space:nowrap;overflow:hidden}#info .sum:hover{background:#262626}
+#info .sum span:last-child{color:#999;overflow:hidden;text-overflow:ellipsis}#info .arr{color:#888;width:10px}
+#info .rows{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:4px 16px;padding:2px 10px 8px 28px}
+#info .rows i{display:block;font-style:normal;color:#888;font-size:11px}#info .path{grid-column:1/-1;color:#777;word-break:break-all;font-size:11px}
 #settings{padding:6px 10px;background:#252525;border-bottom:1px solid #444;display:flex;flex-wrap:wrap;gap:6px 24px}
 #settings .meth{display:flex;gap:8px;align-items:center}#settings .meth label{min-width:200px}
 select{background:#3a3a3a;color:#ddd;border:1px solid #555}
