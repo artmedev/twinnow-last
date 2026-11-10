@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Twinnow: free private app to find similar photos and keep the best</title>
 <meta name="description" content="Twinnow is a free, open-source desktop app that finds similar photos and lets you keep the best shots. Everything runs on your computer, nothing is uploaded, and it never deletes anything: it only copies your picks. Windows, macOS, Linux.">
-<meta property="og:title" content="Twinnow: keep the best shot, skip the twins">
+<meta property="og:title" content="Twinnow: winnow your photos, keep the best shot">
 <meta property="og:description" content="Free and open source. 100% on your computer. Never deletes, only copies.">
 <meta property="og:image" content="https://twinnow.artme.dev/screenshot.jpg">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><text y='20' font-size='20'>★</text></svg>">
@@ -14,7 +14,8 @@
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
 a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
 .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
-.logo{font-size:22px;font-weight:800;letter-spacing:-.5px;background:linear-gradient(90deg,var(--star),#ff8a3d 45%,var(--accent));-webkit-background-clip:text;background-clip:text;color:transparent}
+.logo{font-size:22px;font-weight:800;letter-spacing:-.5px;color:var(--fg)}
+.def{color:var(--muted);font-size:15px;margin:-6px auto 22px}.def i{color:var(--fg);font-style:normal;font-weight:600}
 nav{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:20px 0;flex-wrap:wrap}
 nav div{display:flex;gap:24px;flex-wrap:wrap}nav div a{color:var(--muted);font-size:15px}
 header{padding:48px 0 40px;text-align:center}
@@ -50,7 +51,8 @@ footer{padding:40px 0;border-top:1px solid var(--line);color:var(--muted);text-a
 
 <header class="wrap">
   <div class="badges"><span class="badge">100% free</span><span class="badge">Open source</span><span class="badge">Runs on your computer</span><span class="badge">Never deletes, only copies</span></div>
-  <h1>Keep the <span>best</span> shot.<br>Skip the twins.</h1>
+  <h1>Winnow your photos.<br>Keep the <span>best</span> shot.</h1>
+  <p class="def"><i>win·now</i> /ˈwɪn.oʊ/: to separate the grain from the chaff. Twinnow does it for your photo twins.</p>
   <p class="lead">Twinnow finds series of similar photos on your drive, shows them side by side so you can star the best ones, and copies your picks to a new place with the same folder structure. <b>Your photos never leave your computer, and nothing is ever deleted.</b></p>
   <div class="dl">
     <a class="os" data-os="win" href="https://github.com/artmedev/twinnow-last/releases/download/latest/Twinnow.exe">
