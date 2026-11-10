@@ -153,5 +153,27 @@ function analyzeLoop() {
     loop = null; progress({ error });
   })();
 }
+// Magic mode: in every folder without favorites, favorite each unique photo and one random photo of each group.
+// Resumable: processed folders get favorites and are skipped next time.
+let magicBusy = false;
+ipcMain.handle('magic', async e => {
+  if (magicBusy) return null;
+  magicBusy = true;
+  let added = 0, dirs = 0;
+  try {
+    const keys = needed(state.settings), list = state.dirs.filter(d => !favs[d.dir]);
+    for (const [i, d] of list.entries()) {
+      e.sender.send('magicProgress', { i, n: list.length });
+      const items = await analyzeDir(d.dir, keys).catch(() => null);
+      if (!items?.length) continue;
+      markDone(d.dir, keys, items);
+      const r = group(items, state.settings);
+      setLast(d.dir, r);
+      favs[d.dir] = r.groups.map(g => g[Math.floor(Math.random() * g.length)]);
+      added += favs[d.dir].length; dirs++; saveFavs();
+    }
+  } finally { magicBusy = false; e.sender.send('magicProgress', null); }
+  return { added, dirs, favs };
+});
 ipcMain.handle('setRunning', (e, on) => { state.running = on; saveState(); on ? analyzeLoop() : progress(); });
 ipcMain.handle('doneDirs', () => state.dirs.map(d => d.dir).filter(d => isDone(d, needed(state.settings))));

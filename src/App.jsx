@@ -71,6 +71,7 @@ export default function App() {
   const [showSet, setShowSet] = useState(false);
   const [prog, setProg] = useState(null);
   const [dirProg, setDirProg] = useState({});
+  const [magic, setMagic] = useState(null);
   const [done, setDone] = useState(new Set());
   const [, setLang] = useState();
   const loadDone = () => api.doneDirs().then(d => setDone(new Set(d)));
@@ -86,6 +87,7 @@ export default function App() {
   useEffect(() => {
     api.onScan(n => setStatus(t('scanning', n)));
     api.onProgress(setProg);
+    api.onMagic(setMagic);
     api.onDirProgress(p => setDirProg(s => ({ ...s, [p.dir]: p })));
     api.onDirDone(d => setDone(s => new Set(s).add(d)));
     loadDone();
@@ -110,6 +112,12 @@ export default function App() {
     if (!Object.keys(favs).length) return alert(t('noFavs'));
     const r = await api.copyFavs(root, t('copyTitle')); if (!r) return;
     alert(t('copied', r.copied, r.skipped, r.errors, r.dest));
+  };
+
+  const runMagic = async () => {
+    if (!confirm(t('magicQ'))) return;
+    const r = await api.magic(); if (!r) return;
+    setFavs({ ...r.favs }); alert(t('magicDone', r.added, r.dirs));
   };
 
   const openGroup = (gs, i) => { setGi(i); setCur(gs[i]?.[0] || null); };
@@ -154,6 +162,8 @@ export default function App() {
         <button onClick={() => setShowSet(!showSet)}>{t('algo')}</button>
         <button onClick={() => api.setRunning(!prog?.running)}>{prog?.running ? t('pause') : t('run')}</button>
         <span>{prog && t('analyzed', prog.done, prog.total) + (prog.running && prog.dir ? ` · ${base(prog.dir)} ${prog.i}/${prog.n}` : '') + (prog.error ? ' · ' + t(prog.error) : '')}</span>
+        <button onClick={runMagic} disabled={!!magic || !tree}>{t('magic')}</button>
+        {magic && <span>{t('magicRun', magic.i, magic.n)}</span>}
         <span>{status}</span>
         <LangSwitch onChange={setLang} />
       </div>
