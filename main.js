@@ -47,12 +47,12 @@ ipcMain.handle('scan', async (e, root) => {
 });
 
 const { analyzeDir } = require('./lib/analyzer');
-const { group, enabled } = require('./lib/group');
+const { group, needed } = require('./lib/group');
 
 // Group similar photos in folder
 ipcMain.handle('groups', async (e, dir, thr = 12) => {
   const s = { mode: 'and', m: { dh: { on: true, thr } } };
-  return group(await analyzeDir(dir, enabled(s).map(x => x[0])), s);
+  return group(await analyzeDir(dir, needed(s)), s);
 });
 
 ipcMain.handle('thumb', async (e, file) => {
