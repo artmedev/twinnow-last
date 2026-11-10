@@ -116,6 +116,7 @@ export default function App() {
   const copy = async () => {
     if (!favCount) return alert(t('noFavs'));
     const r = await api.copyFavs(root, t('copyTitle')); if (!r) return;
+    if (r.error) return alert(t(r.error));
     alert(t('copied', r.copied, r.skipped, r.errors, r.dest));
   };
 

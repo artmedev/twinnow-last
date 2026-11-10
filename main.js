@@ -139,6 +139,8 @@ ipcMain.handle('copyFavs', async (e, root, title) => {
   const r = await dialog.showOpenDialog({ properties: ['openDirectory', 'createDirectory'], title });
   if (r.canceled) return null;
   const dest = r.filePaths[0];
+  // copies inside the scanned folder would mix with the originals and show up in the next analysis
+  if (inRoot(dest, root)) return { error: 'destInside' };
   let copied = 0, skipped = 0, errors = 0;
   for (const [dir, files] of Object.entries(favs)) if (inRoot(dir, root)) for (const f of files) {
     let rel = root ? path.relative(root, f) : '';

@@ -3,6 +3,7 @@ import { useState } from 'react';
 // keys: UI strings; {0},{1}… are placeholders
 const D = {
   en: {
+    destInside: "Choose a destination outside the scanned folder, so copies do not mix with the originals.",
     clear: "Clear favorites", clearQ: "Remove all {0} favorites? Only the stars are cleared, files stay untouched.",
     magic: "✨ Magic mode", magicQ: "Analyze all folders with the current algorithm and favorite every unique photo and one random photo from each group of similar ones? Favorites you set by hand are kept; previous Magic picks are replaced.", magicRun: "Magic mode: {0}/{1} folders", magicDone: "Magic mode done: {0} favorites in {1} folders",
     pick: 'Choose folder / drive…', copy: 'Copy favorites…', algo: 'Similarity…', run: '▶ Analyze all folders', pause: '⏸ Pause analysis',
@@ -17,6 +18,7 @@ const D = {
     size: 'Size', res: 'Resolution', taken: 'Taken', camera: 'Camera', lens: 'Lens', exposure: 'Exposure', gps: 'Location', scores: 'Vs first in group',
   },
   es: {
+    destInside: "Elige un destino fuera de la carpeta analizada para que las copias no se mezclen con los originales.",
     clear: "Quitar favoritas", clearQ: "¿Quitar las {0} favoritas? Solo se borran las estrellas, los archivos no se tocan.",
     magic: "✨ Modo mágico", magicQ: "¿Analizar todas las carpetas con el algoritmo actual y marcar como favoritas las fotos únicas y una al azar de cada grupo? Se conservan tus favoritas manuales; se reemplazan las elecciones mágicas anteriores.", magicRun: "Modo mágico: {0}/{1} carpetas", magicDone: "Modo mágico listo: {0} favoritas en {1} carpetas",
     pick: 'Elegir carpeta / disco…', copy: 'Copiar favoritas…', algo: 'Similitud…', run: '▶ Analizar todas', pause: '⏸ Pausar análisis',
@@ -31,6 +33,7 @@ const D = {
     size: 'Tamaño', res: 'Resolución', taken: 'Fecha', camera: 'Cámara', lens: 'Objetivo', exposure: 'Exposición', gps: 'Ubicación', scores: 'Vs primera del grupo',
   },
   fr: {
+    destInside: "Choisissez une destination hors du dossier analysé, pour que les copies ne se mélangent pas aux originaux.",
     clear: "Effacer les favoris", clearQ: "Retirer les {0} favoris ? Seules les étoiles sont effacées, les fichiers restent intacts.",
     magic: "✨ Mode magique", magicQ: "Analyser tous les dossiers avec l’algorithme actuel et mettre en favori chaque photo unique et une au hasard de chaque groupe ? Vos favoris manuels sont conservés ; les choix magiques précédents sont remplacés.", magicRun: "Mode magique : {0}/{1} dossiers", magicDone: "Mode magique terminé : {0} favoris dans {1} dossiers",
     pick: 'Choisir dossier / disque…', copy: 'Copier les favoris…', algo: 'Similarité…', run: '▶ Analyser tous', pause: '⏸ Pause analyse',
@@ -45,6 +48,7 @@ const D = {
     size: 'Taille', res: 'Résolution', taken: 'Prise', camera: 'Appareil', lens: 'Objectif', exposure: 'Exposition', gps: 'Lieu', scores: 'Vs première du groupe',
   },
   ru: {
+    destInside: "Выберите папку вне сканируемой, чтобы копии не смешались с оригиналами.",
     clear: "Сбросить избранные", clearQ: "Сбросить все избранные ({0})? Снимаются только звёздочки, файлы не трогаются.",
     magic: "✨ Magic mode", magicQ: "Обработать все папки текущим алгоритмом и сделать избранными все одиночные фото и по одному случайному из каждой группы похожих? Ваши ручные избранные сохранятся, прошлый выбор Magic mode заменится.", magicRun: "Magic mode: {0}/{1} папок", magicDone: "Magic mode готово: {0} избранных в {1} папках",
     pick: 'Выбрать папку / диск…', copy: 'Копировать избранные…', algo: 'Похожесть…', run: '▶ Анализ всех папок', pause: '⏸ Пауза анализа',
@@ -59,6 +63,7 @@ const D = {
     size: 'Размер', res: 'Разрешение', taken: 'Снято', camera: 'Камера', lens: 'Объектив', exposure: 'Экспозиция', gps: 'Место', scores: 'Против первого в группе',
   },
   ar: {
+    destInside: "اختر وجهة خارج المجلد الممسوح حتى لا تختلط النسخ بالأصول.",
     clear: "مسح المفضلة", clearQ: "إزالة كل المفضلة ({0})؟ تُزال النجوم فقط ولا تُمس الملفات.",
     magic: "✨ الوضع السحري", magicQ: "تحليل كل المجلدات بالخوارزمية الحالية وتعليم كل صورة فريدة وصورة عشوائية من كل مجموعة كمفضلة؟ تبقى مفضلتك اليدوية وتُستبدل اختيارات الوضع السحري السابقة.", magicRun: "الوضع السحري: {0}/{1} مجلد", magicDone: "اكتمل الوضع السحري: {0} مفضلة في {1} مجلد",
     pick: 'اختر مجلدًا / قرصًا…', copy: 'نسخ المفضلة…', algo: 'التشابه…', run: '▶ تحليل كل المجلدات', pause: '⏸ إيقاف التحليل',
@@ -73,6 +78,7 @@ const D = {
     size: 'الحجم', res: 'الدقة', taken: 'التاريخ', camera: 'الكاميرا', lens: 'العدسة', exposure: 'التعريض', gps: 'الموقع', scores: 'مقارنة بأول صورة',
   },
   zh: {
+    destInside: "请选择扫描文件夹之外的目标位置，以免副本与原件混在一起。",
     clear: "清除收藏", clearQ: "清除全部 {0} 个收藏？只清除星标，文件不受影响。",
     magic: "✨ 魔法模式", magicQ: "用当前算法分析所有文件夹，将每张独特照片及每组相似照片中随机一张设为收藏？手动收藏会保留，之前的魔法选择将被替换。", magicRun: "魔法模式：{0}/{1} 个文件夹", magicDone: "魔法模式完成：{1} 个文件夹中 {0} 张收藏",
     pick: '选择文件夹 / 磁盘…', copy: '复制收藏…', algo: '相似度…', run: '▶ 分析所有文件夹', pause: '⏸ 暂停分析',
