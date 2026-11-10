@@ -56,7 +56,7 @@ state.settings = { ...DEFAULTS, ...state.settings, m: { ...DEFAULTS.m, ...state.
 
 // Group similar photos in folder
 ipcMain.handle('groups', async (e, dir) => {
-  const keys = needed(state.settings), items = await analyzeDir(dir, keys);
+  const keys = needed(state.settings), items = await analyzeDir(dir, keys, (i, n, eta) => e.sender.send('dirProgress', { dir, i, n, eta }));
   markDone(dir, keys, items);
   const r = group(items, state.settings);
   setLast(dir, r);
@@ -125,7 +125,7 @@ function analyzeLoop() {
     while (state.running) {
       const keys = needed(state.settings), d = state.dirs.find(d => !isDone(d.dir, keys));
       if (!d) break;
-      const items = await analyzeDir(d.dir, keys, (i, n) => progress({ dir: d.dir, i, n })).catch(() => []);
+      const items = await analyzeDir(d.dir, keys, (i, n, eta) => { progress({ dir: d.dir, i, n }); win?.webContents.send('dirProgress', { dir: d.dir, i, n, eta }); }).catch(() => []);
       if (!markDone(d.dir, keys, items)) { error = 'errFeatures'; break; }
     }
     loop = null; progress({ error });

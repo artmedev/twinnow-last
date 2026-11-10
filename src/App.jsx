@@ -6,6 +6,7 @@ const api = window.api;
 const cache = new Map();
 const url = f => 'file:///' + f.replace(/\\/g, '/').split('/').map((s, i) => i ? encodeURIComponent(s) : s).join('/');
 const base = f => f.split(/[\\/]/).pop();
+const fmtTime = s => s >= 3600 ? `${Math.floor(s / 3600)}h ${Math.round(s % 3600 / 60)}m` : s >= 60 ? `${Math.floor(s / 60)}m ${s % 60}s` : `${s}s`;
 const byName = (a, b) => a[0].localeCompare(b[0], undefined, { numeric: true });
 
 function Thumb({ f }) {
@@ -66,6 +67,7 @@ export default function App() {
   const [settings, setSettings] = useState(null);
   const [showSet, setShowSet] = useState(false);
   const [prog, setProg] = useState(null);
+  const [dirProg, setDirProg] = useState({});
   const [done, setDone] = useState(new Set());
   const [, setLang] = useState();
   const loadDone = () => api.doneDirs().then(d => setDone(new Set(d)));
@@ -81,6 +83,7 @@ export default function App() {
   useEffect(() => {
     api.onScan(n => setStatus(t('scanning', n)));
     api.onProgress(setProg);
+    api.onDirProgress(p => setDirProg(s => ({ ...s, [p.dir]: p })));
     api.onDirDone(d => setDone(s => new Set(s).add(d)));
     loadDone();
     api.getState().then(s => {
@@ -157,6 +160,7 @@ export default function App() {
         <div id="right">
           <div id="groups">
             {curDir && !groups && t('grouping')}
+            {dirProg[curDir]?.i < dirProg[curDir]?.n && <div id="eta">{t('eta', dirProg[curDir].i, dirProg[curDir].n, fmtTime(dirProg[curDir].eta))}</div>}
             {groups?.map((gr, i) => (
               <div key={gr[0]} className={'grp' + (i === gi ? ' sel' : '') + (gr.some(f => favSet.has(f)) ? ' hasfav' : '')}
                 onClick={() => openGroup(groups, i)}>
