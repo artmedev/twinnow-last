@@ -36,11 +36,11 @@ function buildTree(root, dirs) {
   return t;
 }
 
-function TreeNode({ name, node, favs, curDir, open, done }) {
+function TreeNode({ name, node, favs, curDir, open, done, busy }) {
   const kids = Object.entries(node.kids).sort(byName);
   const f = favs[node.dir];
   const label = (
-    <div className={'node' + (f ? ' done' : '') + (node.dir === curDir ? ' sel' : '') + (node.n && !done.has(node.dir) ? ' todo' : '')}
+    <div className={'node' + (f ? ' done' : '') + (node.dir === curDir ? ' sel' : '') + (node.n && !done.has(node.dir) ? ' todo' : '') + (node.dir === busy ? ' busy' : '')}
       title={f ? t('processed', f.length) : ''}
       onClick={e => { if (node.n) { e.preventDefault(); open(node.dir); } }}>
       {name}{node.n ? ` (${node.n})` : ''}
@@ -50,7 +50,7 @@ function TreeNode({ name, node, favs, curDir, open, done }) {
   return (
     <details open>
       <summary>{label}</summary>
-      {kids.map(([k, v]) => <TreeNode key={k} name={k} node={v} favs={favs} curDir={curDir} open={open} done={done} />)}
+      {kids.map(([k, v]) => <TreeNode key={k} name={k} node={v} favs={favs} curDir={curDir} open={open} done={done} busy={busy} />)}
     </details>
   );
 }
@@ -90,6 +90,7 @@ export default function App() {
     api.onScan(n => setStatus(t('scanning', n)));
     api.onProgress(setProg);
     api.onMagic(setMagic);
+    api.onMagicDir(({ dir, list }) => setFavs(s => ({ ...s, [dir]: list })));
     api.onDirProgress(p => setDirProg(s => ({ ...s, [p.dir]: p })));
     api.onDirDone(d => setDone(s => new Set(s).add(d)));
     loadDone();
@@ -141,6 +142,7 @@ export default function App() {
   const favSet = useMemo(() => new Set(favs[curDir] || []), [favs, curDir]);
   const toggle = async f => f && setFavs(await api.setFav(curDir, f, !favSet.has(f)));
   const g = groups?.[gi] || [];
+  const busy = magic?.dir || (prog?.running && prog.dir);
 
   useEffect(() => {
     const h = e => {
@@ -165,14 +167,14 @@ export default function App() {
         <button onClick={() => api.setRunning(!prog?.running)}>{prog?.running ? t('pause') : t('run')}</button>
         <span>{prog && t('analyzed', prog.done, prog.total) + (prog.running && prog.dir ? ` · ${base(prog.dir)} ${prog.i}/${prog.n}` : '') + (prog.error ? ' · ' + t(prog.error) : '')}</span>
         <button onClick={runMagic} disabled={!!magic || !tree}>{t('magic')}</button>
-        {magic && <span>{t('magicRun', magic.i, magic.n)}</span>}
+        {magic && <span>{t('magicRun', magic.i, magic.n)} · {base(magic.dir)}</span>}
         <span>{status}</span>
         <LangSwitch onChange={setLang} />
       </div>
       {showSet && settings && <Settings value={settings} onApply={async s => { await api.setSettings(s); setSettings(s); loadDone(); setShowSet(false); curDir && open(curDir, { cur }); }} />}
       <ModelToast onReady={s => { setSettings(s); loadDone(); curDir && open(curDir, { cur }); }} />
       <div id="main">
-        <div id="tree">{tree && <TreeNode name={root} node={tree} favs={favs} curDir={curDir} open={open} done={done} />}</div>
+        <div id="tree">{tree && <TreeNode name={root} node={tree} favs={favs} curDir={curDir} open={open} done={done} busy={busy} />}</div>
         <div id="right">
           <div id="groups">
             {curDir && !groups && t('grouping')}

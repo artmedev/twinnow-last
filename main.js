@@ -179,7 +179,7 @@ ipcMain.handle('magic', async e => {
     const keys = needed(state.settings), list = state.dirs.filter(d => !favs[d.dir]), gen = rootGen;
     for (const [i, d] of list.entries()) {
       if (gen !== rootGen) break;
-      e.sender.send('magicProgress', { i, n: list.length });
+      e.sender.send('magicProgress', { i, n: list.length, dir: d.dir });
       const items = await analyzeDir(d.dir, keys, null, () => gen !== rootGen).catch(() => null);
       if (!items?.length || items.cancelled) continue;
       markDone(d.dir, keys, items);
@@ -187,6 +187,7 @@ ipcMain.handle('magic', async e => {
       setLast(d.dir, r);
       favs[d.dir] = r.groups.map(g => g[Math.floor(Math.random() * g.length)]);
       added += favs[d.dir].length; dirs++; saveFavs();
+      e.sender.send('magicDir', { dir: d.dir, list: favs[d.dir] }); // live: folder processed + its favorites
     }
   } finally { magicBusy = false; e.sender.send('magicProgress', null); }
   return { added, dirs, favs };

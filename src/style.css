@@ -33,3 +33,4 @@ select{background:#3a3a3a;color:#ddd;border:1px solid #555}
 #toast{position:fixed;inset-inline-end:16px;bottom:16px;max-width:300px;background:#2d3540;border:1px solid #4a90d9;border-radius:6px;padding:10px 26px 10px 12px;cursor:pointer;box-shadow:0 4px 16px #0008;z-index:20;font-size:12px}
 #toast .x{position:absolute;inset-inline-end:8px;top:4px;font-size:16px;color:#aaa}#toast .x:hover{color:#fff}
 #toast .bar{height:4px;background:#444;margin-top:6px;border-radius:2px}#toast .bar i{display:block;height:100%;background:#4a90d9;border-radius:2px}
+#tree .busy::after{content:' ⟳';color:#4af}
