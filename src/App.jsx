@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import Settings from './Settings.jsx';
 
 const api = window.api;
 const cache = new Map();
@@ -58,7 +59,8 @@ export default function App() {
   const [groups, setGroups] = useState(null);
   const [gi, setGi] = useState(0);
   const [cur, setCur] = useState(null);
-  const [thr, setThr] = useState(12);
+  const [settings, setSettings] = useState(null);
+  const [showSet, setShowSet] = useState(false);
 
   const scan = async d => {
     setRoot(d);
@@ -71,11 +73,10 @@ export default function App() {
   useEffect(() => {
     api.onScan(n => setStatus(`Сканирование… папок с фото: ${n}`));
     api.getState().then(s => {
-      setFavs(s.favs);
+      setFavs(s.favs); setSettings(s.settings);
       if (!s.root) return;
       setRoot(s.root); setTree(buildTree(s.root, s.dirs));
-      if (s.ui.thr) setThr(s.ui.thr);
-      if (s.ui.curDir) open(s.ui.curDir, s.ui.thr || thr, s.ui);
+      if (s.ui.curDir) open(s.ui.curDir, s.ui);
       if (s.scanning) scan(s.root);
     });
   }, []);
@@ -86,7 +87,7 @@ export default function App() {
     scan(d);
   };
 
-  useEffect(() => { if (curDir) api.setUi({ curDir, gi, cur, thr }); }, [curDir, gi, cur, thr]);
+  useEffect(() => { if (curDir) api.setUi({ curDir, gi, cur }); }, [curDir, gi, cur]);
 
   const copy = async () => {
     if (!Object.keys(favs).length) return alert('Нет избранных фото');
@@ -95,9 +96,9 @@ export default function App() {
   };
 
   const openGroup = (gs, i) => { setGi(i); setCur(gs[i]?.[0] || null); };
-  const open = async (dir, t = thr, keep) => {
+  const open = async (dir, keep) => {
     setCurDir(dir); setGroups(null);
-    const gs = await api.groups(dir, t);
+    const gs = await api.groups(dir);
     setGroups(gs);
     const i = keep && gs[keep.gi] ? keep.gi : 0;
     openGroup(gs, i);
@@ -127,10 +128,10 @@ export default function App() {
       <div id="bar">
         <button onClick={pick}>Выбрать папку / диск…</button>
         <button onClick={copy}>Копировать избранные…</button>
-        <label>Порог похожести <input type="range" min="2" max="24" value={thr}
-          onChange={e => setThr(+e.target.value)} onMouseUp={() => curDir && open(curDir, thr)} /> {thr}</label>
+        <button onClick={() => setShowSet(!showSet)}>Алгоритм похожести…</button>
         <span>{status}</span>
       </div>
+      {showSet && settings && <Settings value={settings} onApply={async s => { await api.setSettings(s); setSettings(s); setShowSet(false); curDir && open(curDir, { gi: 0 }); }} />}
       <div id="main">
         <div id="tree">{tree && <TreeNode name={root} node={tree} favs={favs} curDir={curDir} open={open} />}</div>
         <div id="right">
