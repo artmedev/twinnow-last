@@ -57,6 +57,7 @@ export default function App() {
   const [favs, setFavs] = useState({});
   const [curDir, setCurDir] = useState(null);
   const [groups, setGroups] = useState(null);
+  const [scores, setScores] = useState({});
   const [gi, setGi] = useState(0);
   const [cur, setCur] = useState(null);
   const [settings, setSettings] = useState(null);
@@ -104,8 +105,8 @@ export default function App() {
   const openGroup = (gs, i) => { setGi(i); setCur(gs[i]?.[0] || null); };
   const open = async (dir, keep) => {
     setCurDir(dir); setGroups(null);
-    const gs = await api.groups(dir);
-    setGroups(gs);
+    const { groups: gs, scores } = await api.groups(dir);
+    setGroups(gs); setScores(scores);
     const i = keep && gs[keep.gi] ? keep.gi : 0;
     openGroup(gs, i);
     if (keep && gs[i].includes(keep.cur)) setCur(keep.cur);

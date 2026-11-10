@@ -48,15 +48,19 @@ ipcMain.handle('scan', async (e, root) => {
   return out;
 });
 
-const { analyzeDir } = require('./lib/analyzer');
-const { group, needed, DEFAULTS } = require('./lib/group');
+const { analyzeDir, setLast } = require('./lib/analyzer');
+const embed = require('./lib/embed');
+const { group, needed: neededFor, DEFAULTS } = require('./lib/group');
+const needed = s => neededFor(s.m.em.on || embed.isReady());
 state.settings = { ...DEFAULTS, ...state.settings, m: { ...DEFAULTS.m, ...state.settings?.m } };
 
 // Group similar photos in folder
 ipcMain.handle('groups', async (e, dir) => {
   const keys = needed(state.settings), items = await analyzeDir(dir, keys);
   markDone(dir, keys, items);
-  return group(items, state.settings);
+  const r = group(items, state.settings);
+  setLast(dir, r);
+  return r;
 });
 ipcMain.handle('setSettings', (e, s) => { state.settings = s; saveState(); });
 
