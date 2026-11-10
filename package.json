@@ -1,5 +1,5 @@
 {
-  "name": "bestphoto",
+  "name": "twinnow",
   "version": "1.0.0",
   "main": "main.js",
   "scripts": {
@@ -18,13 +18,13 @@
     "@huggingface/transformers": "^3.8.1",
     "exifr": "^7.1.3"
   },
-  "productName": "BestPhoto",
+  "productName": "Twinnow",
   "build": {
     "directories": {
       "output": "release"
     },
-    "appId": "com.artmedev.bestphoto",
-    "productName": "BestPhoto",
+    "appId": "dev.artme.twinnow",
+    "productName": "Twinnow",
     "files": [
       "main.js",
       "preload.js",
@@ -50,7 +50,8 @@
       "files": [
         "!node_modules/onnxruntime-node/bin/napi-v*/linux/**",
         "!node_modules/onnxruntime-node/bin/napi-v*/darwin/**"
-      ]
+      ],
+      "artifactName": "Twinnow.exe"
     },
     "portable": {
       "artifactName": "BestPhoto.exe"
@@ -59,7 +60,7 @@
       "target": "dmg",
       "identity": "-",
       "category": "public.app-category.photography",
-      "artifactName": "BestPhoto-mac.${ext}",
+      "artifactName": "Twinnow-mac.${ext}",
       "files": [
         "!node_modules/onnxruntime-node/bin/napi-v*/win32/**",
         "!node_modules/onnxruntime-node/bin/napi-v*/linux/**"
@@ -72,7 +73,7 @@
         "rpm"
       ],
       "category": "Graphics",
-      "artifactName": "BestPhoto-linux.${ext}",
+      "artifactName": "Twinnow-linux.${ext}",
       "files": [
         "!node_modules/onnxruntime-node/bin/napi-v*/win32/**",
         "!node_modules/onnxruntime-node/bin/napi-v*/darwin/**"
@@ -88,5 +89,5 @@
     "name": "artmedev",
     "email": "artmedev@users.noreply.github.com"
   },
-  "homepage": "https://github.com/artmedev/bestphoto"
+  "homepage": "https://twinnow.artme.dev"
 }

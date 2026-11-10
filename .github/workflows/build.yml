@@ -32,7 +32,7 @@ jobs:
       - name: Upload to rolling "latest" release
         shell: bash
         run: |
-          files=$(ls release/BestPhoto* | grep -E '\.(exe|dmg|AppImage|deb|rpm)$')
+          files=$(ls release/Twinnow* | grep -E '\.(exe|dmg|AppImage|deb|rpm)$')
           gh release upload latest $files --clobber
   notes:
     needs: build

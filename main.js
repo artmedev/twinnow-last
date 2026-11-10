@@ -4,7 +4,12 @@ const fs = require('fs'), fsp = fs.promises, path = require('path');
 const SKIP = new Set(['windows', 'program files', 'program files (x86)', 'programdata', 'appdata', 'node_modules', '$recycle.bin', 'system volume information', 'proc', 'sys', 'dev', 'run', 'snap']);
 const { isImg } = require('./lib/analyzer');
 const store = require('./lib/store');
-store.init(app.getPath('userData'));
+// keep the data of the app's previous name (BestPhoto): copied once, the old folder stays as is
+const ud = app.getPath('userData'), oldUd = path.join(app.getPath('appData'), 'bestphoto');
+if (!fs.existsSync(path.join(ud, 'state.json')) && fs.existsSync(path.join(oldUd, 'state.json'))) {
+  try { fs.cpSync(oldUd, ud, { recursive: true, filter: s => !/Cache|Dawn|Local Storage|Network/i.test(s) }); } catch {}
+}
+store.init(ud);
 const state = store.load('state.json', { root: null, dirs: [], ui: {}, scanning: false });
 const favs = store.load('favorites.json', {});
 const saveState = () => store.save('state.json', state);
