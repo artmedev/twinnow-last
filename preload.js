@@ -6,5 +6,6 @@ contextBridge.exposeInMainWorld('api', {
   setRunning: call('setRunning'), doneDirs: call('doneDirs'),
   onProgress: cb => ipcRenderer.on('progress', (e, p) => cb(p)), onDirDone: cb => ipcRenderer.on('dirDone', (e, d) => cb(d)),
   onDirProgress: cb => ipcRenderer.on('dirProgress', (e, p) => cb(p)),
+  modelReady: call('modelReady'), downloadModel: call('downloadModel'), onModelProgress: cb => ipcRenderer.on('modelProgress', (e, p) => cb(p)),
   onScan: cb => ipcRenderer.on('scanProgress', (e, n) => cb(n)),
 });

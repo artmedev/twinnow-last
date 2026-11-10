@@ -25,3 +25,6 @@ select{background:#3a3a3a;color:#ddd;border:1px solid #555}
 #lang .menu{position:absolute;inset-inline-end:0;top:100%;background:#2a2a2a;border:1px solid #555;z-index:10}
 #lang .menu div{padding:4px 10px;cursor:pointer;white-space:nowrap;display:flex;gap:6px;align-items:center}#lang .menu div:hover{background:#3a3a3a}
 #groups{position:relative}#eta{position:absolute;inset-inline-start:6px;bottom:2px;background:#000c;padding:1px 6px;font-size:12px;z-index:2}
+#toast{position:fixed;inset-inline-end:16px;bottom:16px;max-width:300px;background:#2d3540;border:1px solid #4a90d9;border-radius:6px;padding:10px 26px 10px 12px;cursor:pointer;box-shadow:0 4px 16px #0008;z-index:20;font-size:12px}
+#toast .x{position:absolute;inset-inline-end:8px;top:4px;font-size:16px;color:#aaa}#toast .x:hover{color:#fff}
+#toast .bar{height:4px;background:#444;margin-top:6px;border-radius:2px}#toast .bar i{display:block;height:100%;background:#4a90d9;border-radius:2px}

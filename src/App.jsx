@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import Settings from './Settings.jsx';
 import { t, LangSwitch } from './i18n.jsx';
+import ModelToast from './ModelToast.jsx';
 
 const api = window.api;
 const cache = new Map();
@@ -155,6 +156,7 @@ export default function App() {
         <LangSwitch onChange={setLang} />
       </div>
       {showSet && settings && <Settings value={settings} onApply={async s => { await api.setSettings(s); setSettings(s); loadDone(); setShowSet(false); curDir && open(curDir, { cur }); }} />}
+      <ModelToast onReady={s => { setSettings(s); loadDone(); curDir && open(curDir, { cur }); }} />
       <div id="main">
         <div id="tree">{tree && <TreeNode name={root} node={tree} favs={favs} curDir={curDir} open={open} done={done} />}</div>
         <div id="right">

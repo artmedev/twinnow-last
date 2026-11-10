@@ -65,6 +65,20 @@ ipcMain.handle('groups', async (e, dir) => {
 // instant result: last saved grouping, or all photos as one provisional group
 ipcMain.handle('groupsQuick', async (e, dir) => getLast(dir) ||
   { groups: [(await fsp.readdir(dir)).filter(isImg).sort((a, b) => a.localeCompare(b, undefined, { numeric: true })).map(f => path.join(dir, f))], scores: {} });
+// neural model: availability check and download with progress; enables the method when done
+ipcMain.handle('modelReady', () => embed.isReady());
+ipcMain.handle('downloadModel', async e => {
+  const files = {};
+  const onProgress = p => {
+    if (p.status !== 'progress' || !p.total) return;
+    files[p.file] = [p.loaded, p.total];
+    const v = Object.values(files);
+    e.sender.send('modelProgress', Math.round(100 * v.reduce((s, x) => s + x[0], 0) / v.reduce((s, x) => s + x[1], 0)));
+  };
+  try { await embed.load(onProgress); } catch { return null; }
+  state.settings.m.em.on = true; saveState(); progress();
+  return state.settings;
+});
 ipcMain.handle('setSettings', (e, s) => { state.settings = s; saveState(); });
 
 ipcMain.handle('thumb', async (e, file) => {
