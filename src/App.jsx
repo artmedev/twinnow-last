@@ -112,12 +112,13 @@ export default function App() {
   useEffect(() => { if (curDir) api.setUi({ curDir, gi, cur }); }, [curDir, gi, cur]);
 
   const copy = async () => {
-    if (!Object.keys(favs).length) return alert(t('noFavs'));
+    if (!favCount) return alert(t('noFavs'));
     const r = await api.copyFavs(root, t('copyTitle')); if (!r) return;
     alert(t('copied', r.copied, r.skipped, r.errors, r.dest));
   };
 
-  const favCount = Object.values(favs).reduce((n, l) => n + l.length, 0);
+  // favorites of the chosen root only (favorites from other roots stay saved but are not copied or cleared)
+  const favCount = Object.entries(favs).filter(([d]) => root && (d === root || d.startsWith(root.replace(/[\\/]$/, '') + (root.includes('\\') ? '\\' : '/')))).reduce((n, [, l]) => n + l.length, 0);
   const clearFavs = async () => { if (favCount && confirm(t('clearQ', favCount))) setFavs({ ...(await api.clearFavs()) }); };
   const runMagic = async () => {
     if (!confirm(t('magicQ'))) return;

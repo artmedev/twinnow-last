@@ -17,6 +17,10 @@ const saveFavs = () => store.save('favorites.json', favs, 0);
 app.on('before-quit', store.flush);
 
 ipcMain.handle('getState', () => ({ ...state, favs }));
+
+// is folder d the chosen root or inside it (case-insensitive on Windows)
+const norm = p => (process.platform === 'win32' ? p.toLowerCase() : p).replace(/[\\/]+$/, '');
+const inRoot = (d, root) => !!root && (norm(d) === norm(root) || norm(d).startsWith(norm(root) + path.sep));
 ipcMain.handle('setUi', (e, ui) => { state.ui = ui; saveState(); });
 
 let win;
@@ -111,10 +115,10 @@ ipcMain.handle('info', async (e, f) => {
     exp: x.ExposureTime, f: x.FNumber, iso: x.ISO, focal: x.FocalLength, lat: x.latitude, lon: x.longitude };
 });
 
-// clears all favorites (only the app's list, files are untouched)
+// clears favorites of the chosen root folder (only the app's list, files are untouched)
 ipcMain.handle('clearFavs', () => {
-  for (const k of Object.keys(favs)) delete favs[k];
-  for (const k of Object.keys(magicPicks)) delete magicPicks[k];
+  for (const k of Object.keys(favs)) if (inRoot(k, state.root)) delete favs[k];
+  for (const k of Object.keys(magicPicks)) if (inRoot(k, state.root)) delete magicPicks[k];
   saveFavs(); store.save('magic.json', magicPicks);
   return favs;
 });
@@ -128,13 +132,13 @@ ipcMain.handle('setFav', (e, dir, file, on) => {
   return favs;
 });
 
-// Copy favorites keeping folder structure (relative to root, or to drive root if outside). Never overwrites.
+// Copy favorites of the chosen root folder only, keeping folder structure (relative to root, or to drive root if outside). Never overwrites.
 ipcMain.handle('copyFavs', async (e, root, title) => {
   const r = await dialog.showOpenDialog({ properties: ['openDirectory', 'createDirectory'], title });
   if (r.canceled) return null;
   const dest = r.filePaths[0];
   let copied = 0, skipped = 0, errors = 0;
-  for (const files of Object.values(favs)) for (const f of files) {
+  for (const [dir, files] of Object.entries(favs)) if (inRoot(dir, root)) for (const f of files) {
     let rel = root ? path.relative(root, f) : '';
     if (!rel || rel.startsWith('..') || path.isAbsolute(rel)) rel = path.join(path.parse(f).root.replace(/[:\\\/]/g, ''), path.relative(path.parse(f).root, f));
     const t = path.join(dest, rel);
