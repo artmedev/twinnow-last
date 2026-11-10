@@ -80,6 +80,7 @@ export default function App() {
   const scan = async d => {
     setRoot(d);
     const dirs = await api.scan(d);
+    if (!dirs) return; // superseded by another folder
     setStatus(t('folders', dirs.length));
     setTree(buildTree(d, dirs)); loadDone();
   };
@@ -134,7 +135,7 @@ export default function App() {
     const q = await api.groupsQuick(dir);
     if (now.current.curDir === dir) show(q, keep);
     const r = await api.groups(dir);
-    if (now.current.curDir === dir) show(r, { cur: now.current.cur, gi: keep?.gi });
+    if (r && now.current.curDir === dir) show(r, { cur: now.current.cur, gi: keep?.gi });
   };
 
   const favSet = useMemo(() => new Set(favs[curDir] || []), [favs, curDir]);

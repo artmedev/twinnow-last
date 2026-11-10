@@ -34,11 +34,14 @@ ipcMain.handle('pickDir', async () => {
 });
 
 // Recursively find folders containing images
+// rootGen changes when another root folder is chosen: everything working on the old one stops
+let rootGen = 0, viewGen = 0;
 ipcMain.handle('scan', async (e, root) => {
-  const out = [];
+  const out = [], gen = ++rootGen;
   Object.assign(state, { root, dirs: out, scanning: true });
   async function walk(dir) {
     let ents;
+    if (gen !== rootGen) return;
     try { ents = await fsp.readdir(dir, { withFileTypes: true }); } catch { return; }
     let n = 0;
     for (const d of ents) {
@@ -49,7 +52,9 @@ ipcMain.handle('scan', async (e, root) => {
     if (n) { out.push({ dir, n }); e.sender.send('scanProgress', out.length); saveState(); }
   }
   await walk(root);
+  if (gen !== rootGen) return null;
   state.scanning = false; saveState();
+  if (state.running) analyzeLoop();
   return out;
 });
 
@@ -61,7 +66,9 @@ state.settings = { ...DEFAULTS, ...state.settings, m: { ...DEFAULTS.m, ...state.
 
 // Group similar photos in folder
 ipcMain.handle('groups', async (e, dir) => {
-  const keys = needed(state.settings), items = await analyzeDir(dir, keys, (i, n, eta) => e.sender.send('dirProgress', { dir, i, n, eta }));
+  const my = ++viewGen, keys = needed(state.settings);
+  const items = await analyzeDir(dir, keys, (i, n, eta) => e.sender.send('dirProgress', { dir, i, n, eta }), () => my !== viewGen);
+  if (items.cancelled) { e.sender.send('dirProgress', { dir, i: 0, n: 0 }); return null; }
   markDone(dir, keys, items);
   const r = group(items, state.settings);
   setLast(dir, r);
@@ -137,7 +144,7 @@ let loop = null;
 const isDone = (dir, keys) => keys.every(k => state.done[dir]?.includes(k));
 const complete = (items, keys) => items.every(it => keys.every(k => it[k] !== undefined));
 function markDone(dir, keys, items) {
-  if (!complete(items, keys)) return false;
+  if (items.cancelled || !complete(items, keys)) return false;
   state.done[dir] = [...new Set([...(state.done[dir] || []), ...keys])];
   saveState(); win?.webContents.send('dirDone', dir);
   return true;
@@ -149,13 +156,16 @@ function progress(extra) {
 function analyzeLoop() {
   loop ||= (async () => {
     let error;
-    while (state.running) {
+    const gen = rootGen;
+    while (state.running && gen === rootGen) {
       const keys = needed(state.settings), d = state.dirs.find(d => !isDone(d.dir, keys));
       if (!d) break;
-      const items = await analyzeDir(d.dir, keys, (i, n, eta) => { progress({ dir: d.dir, i, n }); win?.webContents.send('dirProgress', { dir: d.dir, i, n, eta }); }).catch(() => []);
+      const items = await analyzeDir(d.dir, keys, (i, n, eta) => { progress({ dir: d.dir, i, n }); win?.webContents.send('dirProgress', { dir: d.dir, i, n, eta }); }, () => !state.running || gen !== rootGen).catch(() => []);
+      if (items.cancelled) break;
       if (!markDone(d.dir, keys, items)) { error = 'errFeatures'; break; }
     }
     loop = null; progress({ error });
+    if (state.running && gen !== rootGen) analyzeLoop(); // restart for the new root
   })();
 }
 // Magic mode: in every folder without favorites, favorite each unique photo and one random photo of each group.
@@ -166,11 +176,12 @@ ipcMain.handle('magic', async e => {
   magicBusy = true;
   let added = 0, dirs = 0;
   try {
-    const keys = needed(state.settings), list = state.dirs.filter(d => !favs[d.dir]);
+    const keys = needed(state.settings), list = state.dirs.filter(d => !favs[d.dir]), gen = rootGen;
     for (const [i, d] of list.entries()) {
+      if (gen !== rootGen) break;
       e.sender.send('magicProgress', { i, n: list.length });
-      const items = await analyzeDir(d.dir, keys).catch(() => null);
-      if (!items?.length) continue;
+      const items = await analyzeDir(d.dir, keys, null, () => gen !== rootGen).catch(() => null);
+      if (!items?.length || items.cancelled) continue;
       markDone(d.dir, keys, items);
       const r = group(items, state.settings);
       setLast(d.dir, r);
