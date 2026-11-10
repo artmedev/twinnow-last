@@ -6,7 +6,7 @@ import Info from './Info.jsx';
 
 const api = window.api;
 const cache = new Map();
-const url = f => 'file:///' + f.replace(/\\/g, '/').split('/').map((s, i) => i ? encodeURIComponent(s) : s).join('/');
+const url = f => 'file://' + (f.startsWith('/') ? '' : '/') + f.replace(/\\/g, '/').split('/').map((s, i) => i ? encodeURIComponent(s) : s).join('/');
 const base = f => f.split(/[\\/]/).pop();
 const fmtTime = s => s >= 3600 ? `${Math.floor(s / 3600)}h ${Math.round(s % 3600 / 60)}m` : s >= 60 ? `${Math.floor(s / 60)}m ${s % 60}s` : `${s}s`;
 const byName = (a, b) => a[0].localeCompare(b[0], undefined, { numeric: true });
@@ -25,9 +25,10 @@ function Thumb({ f }) {
 function buildTree(root, dirs) {
   const t = { kids: {}, dir: root, n: 0 };
   for (const { dir, n } of dirs) {
+    const sep = root.includes('\\') ? '\\' : '/';
     let node = t, p = root.replace(/[\\/]$/, '');
     for (const part of dir.slice(root.length).split(/[\\/]/).filter(Boolean)) {
-      p += '\\' + part;
+      p += sep + part;
       node = node.kids[part] ||= { kids: {}, dir: p, n: 0 };
     }
     node.n = n;

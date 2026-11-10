@@ -1,7 +1,7 @@
 const { app, BrowserWindow, ipcMain, dialog, nativeImage } = require('electron');
 const fs = require('fs'), fsp = fs.promises, path = require('path');
 
-const SKIP = new Set(['windows', 'program files', 'program files (x86)', 'programdata', 'appdata', 'node_modules', '$recycle.bin', 'system volume information']);
+const SKIP = new Set(['windows', 'program files', 'program files (x86)', 'programdata', 'appdata', 'node_modules', '$recycle.bin', 'system volume information', 'proc', 'sys', 'dev', 'run', 'snap']);
 const { isImg } = require('./lib/analyzer');
 const store = require('./lib/store');
 store.init(app.getPath('userData'));
