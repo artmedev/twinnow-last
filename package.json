@@ -69,6 +69,11 @@
         "!node_modules/onnxruntime-node/bin/napi-v*/win32/**",
         "!node_modules/onnxruntime-node/bin/napi-v*/darwin/**"
       ]
+    },
+    "rpm": {
+      "fpm": [
+        "--rpm-rpmbuild-define=_build_id_links none"
+      ]
     }
   },
   "author": {
